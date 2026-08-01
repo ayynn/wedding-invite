@@ -1,10 +1,12 @@
 <script setup lang="ts">
+defineOptions({ name: 'photo-wall-section' })
+
 import { reactive, ref, nextTick, onMounted, onUnmounted } from 'vue'
 import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import PhotoSwipe from 'photoswipe'
 import 'photoswipe/style.css'
 import type { WallItem } from '@/types'
-import { fetchWall, uploadWall } from '@/api/client'
+import { fetchWall, likeWall, uploadWall } from '@/api/client'
 import SectionTitle from './SectionTitle.vue'
 
 const props = defineProps<{
@@ -15,6 +17,8 @@ const props = defineProps<{
   en: string
   sub: string
 }>()
+
+const LIKED_KEY = 'wedding_wall_liked'
 
 /* ---------- 列表 ---------- */
 const items = ref<WallItem[]>([])
@@ -30,6 +34,39 @@ const uploadError = ref('')
 const uploadOk = ref(false)
 
 let lightbox: PhotoSwipeLightbox | null = null
+let liking = false
+
+function readLikedIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(LIKED_KEY)
+    const arr = raw ? (JSON.parse(raw) as string[]) : []
+    return new Set(Array.isArray(arr) ? arr : [])
+  } catch {
+    return new Set()
+  }
+}
+
+function writeLikedIds(ids: Set<string>): void {
+  try {
+    localStorage.setItem(LIKED_KEY, JSON.stringify([...ids]))
+  } catch {
+    /* ignore */
+  }
+}
+
+function getItemByIndex(index: number): WallItem | undefined {
+  return items.value[index]
+}
+
+function syncLikeUi(el: HTMLElement, item: WallItem | undefined): void {
+  const liked = item ? readLikedIds().has(item.id) : false
+  const count = item?.likes ?? 0
+  el.classList.toggle('is-liked', liked)
+  el.setAttribute('title', liked ? '已点赞' : '点赞')
+  el.setAttribute('aria-label', liked ? `已点赞 ${count}` : `点赞 ${count}`)
+  const countEl = el.querySelector('.pswp__like-num')
+  if (countEl) countEl.textContent = String(count)
+}
 
 function initLightbox(): void {
   lightbox?.destroy()
@@ -40,6 +77,57 @@ function initLightbox(): void {
     bgOpacity: 0.92,
     showHideAnimationType: 'zoom'
   })
+
+  lightbox.on('uiRegister', () => {
+    const pswp = lightbox?.pswp
+    if (!pswp) return
+
+    pswp.ui?.registerElement({
+      name: 'likeButton',
+      order: 8,
+      isButton: true,
+      appendTo: 'bar',
+      html: {
+        isCustomSVG: true,
+        inner:
+          '<path d="M12 21s-6.2-4.35-9.05-8.1C1.1 10.7 1 7.9 2.7 6.1 4.3 4.4 6.9 4.5 8.6 6.2L12 9.7l3.4-3.5c1.7-1.7 4.3-1.8 5.9-.1 1.7 1.8 1.6 4.6-.25 6.8C18.2 16.65 12 21 12 21z" id="pswp__icn-heart"/>',
+        outlineID: 'pswp__icn-heart'
+      },
+      onInit: (el, pswpInstance) => {
+        el.classList.add('pswp__button--like')
+        const num = document.createElement('span')
+        num.className = 'pswp__like-num'
+        num.textContent = '0'
+        el.appendChild(num)
+
+        const refresh = () => {
+          syncLikeUi(el, getItemByIndex(pswpInstance.currIndex))
+        }
+        pswpInstance.on('change', refresh)
+        pswpInstance.on('openingAnimationStart', refresh)
+        refresh()
+      },
+      onClick: async (_e, el, pswpInstance) => {
+        const item = getItemByIndex(pswpInstance.currIndex)
+        if (!item || liking) return
+        const liked = readLikedIds()
+        if (liked.has(item.id)) return
+        liking = true
+        try {
+          const res = await likeWall(props.endpoint, item.id)
+          item.likes = res.likes
+          liked.add(item.id)
+          writeLikedIds(liked)
+          syncLikeUi(el, item)
+        } catch (err) {
+          console.warn('[Wall] 点赞失败:', err)
+        } finally {
+          liking = false
+        }
+      }
+    })
+  })
+
   lightbox.init()
 }
 
@@ -190,6 +278,7 @@ onUnmounted(() => {
           :style="{ animationDelay: `${Math.min(i, 8) * 0.05}s` }"
         >
           <img :src="it.url" :alt="it.caption || it.name" loading="lazy" />
+          <span class="wall-likes" aria-label="点赞数">♥ {{ it.likes ?? 0 }}</span>
           <div class="wall-meta">
             <b>{{ it.name }}</b>
             <span v-if="it.caption">{{ it.caption }}</span>
@@ -342,6 +431,19 @@ onUnmounted(() => {
 .wall-item:hover img {
   transform: scale(1.05);
 }
+.wall-likes {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(16, 26, 20, 0.5);
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(4px);
+}
 .wall-meta {
   position: absolute;
   left: 0;
@@ -399,5 +501,33 @@ onUnmounted(() => {
   .wall-form input[type='text'] {
     margin-bottom: 10px;
   }
+}
+</style>
+
+<!-- PhotoSwipe 顶栏点赞按钮（非 scoped，挂在 lightbox 根节点） -->
+<style>
+.pswp__button--like {
+  position: relative;
+  color: #fff;
+}
+.pswp__button--like .pswp__icn {
+  fill: rgba(255, 255, 255, 0.92);
+}
+.pswp__button--like.is-liked .pswp__icn {
+  fill: #e8a0a0;
+}
+.pswp__like-num {
+  position: absolute;
+  top: 6px;
+  right: 4px;
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
+  pointer-events: none;
 }
 </style>

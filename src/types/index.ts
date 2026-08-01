@@ -80,6 +80,8 @@ export interface WallItem {
   /** 原始图片宽高（PhotoSwipe 预览用） */
   width: number
   height: number
+  /** 点赞数 */
+  likes: number
   createdAt: string
 }
 

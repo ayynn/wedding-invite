@@ -59,6 +59,24 @@ function getPath(event) {
   return raw.split('?')[0] || '/'
 }
 
+function getQuery(event) {
+  if (event.queryStringParameters && typeof event.queryStringParameters === 'object') {
+    return event.queryStringParameters
+  }
+  const raw =
+    event.path ||
+    event.requestContext?.path ||
+    event.requestContext?.http?.path ||
+    event.url ||
+    ''
+  try {
+    const u = raw.startsWith('http') ? new URL(raw) : new URL(raw, 'http://local')
+    return Object.fromEntries(u.searchParams.entries())
+  } catch {
+    return {}
+  }
+}
+
 function getMethod(event) {
   return (
     event.httpMethod ||
@@ -105,9 +123,14 @@ function normalizeRsvp(body, id, prev = {}) {
   }
 }
 
-async function listRsvp(db) {
+async function listRsvp(db, nameFilter) {
   const { data } = await db.collection('rsvp').limit(1000).get()
-  return json(data || [])
+  let items = data || []
+  if (nameFilter) {
+    const target = nameFilter.trim()
+    items = items.filter((r) => (r.name || '').trim() === target)
+  }
+  return json(items)
 }
 
 async function createRsvp(db, body) {
@@ -154,6 +177,7 @@ async function listWall(db) {
       url: `/wall/${meta.id || meta._id}`,
       width: meta.width,
       height: meta.height,
+      likes: Math.max(0, Number(meta.likes) || 0),
       createdAt: meta.createdAt
     }))
     .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
@@ -201,6 +225,7 @@ async function createWall(app, db, body) {
     caption: (body.caption ?? '').trim().slice(0, 60),
     width: Math.max(1, Math.round(body.width ?? 1280)),
     height: Math.max(1, Math.round(body.height ?? 853)),
+    likes: 0,
     mime: parsed.mime,
     fileID: upload.fileID,
     cloudPath,
@@ -208,6 +233,16 @@ async function createWall(app, db, body) {
   }
   await db.collection('wall').doc(id).set(meta)
   return json({ ok: true, id })
+}
+
+async function likeWall(db, id) {
+  if (!id) return json({ ok: false, error: '缺少 id' }, 400)
+  const { data } = await db.collection('wall').doc(id).get()
+  const prev = Array.isArray(data) ? data[0] : data
+  if (!prev) return json({ ok: false, error: '记录不存在' }, 404)
+  const likes = Math.max(0, Number(prev.likes) || 0) + 1
+  await db.collection('wall').doc(id).set({ ...prev, id, likes })
+  return json({ ok: true, id, likes })
 }
 
 async function updateWall(app, db, id, body) {
@@ -292,6 +327,13 @@ exports.main = async (event) => {
   const db = app.database()
 
   try {
+    const wallLike = path.match(/\/api\/wall\/([^/]+)\/like\/?$/)
+    if (wallLike) {
+      const id = decodeURIComponent(wallLike[1])
+      if (method === 'POST') return await likeWall(db, id)
+      return json({ ok: false, error: 'Method Not Allowed' }, 405)
+    }
+
     const rsvpItem = path.match(/\/api\/rsvp\/([^/]+)\/?$/)
     if (rsvpItem) {
       const id = decodeURIComponent(rsvpItem[1])
@@ -301,7 +343,10 @@ exports.main = async (event) => {
     }
 
     if (path === '/api/rsvp' || path.endsWith('/api/rsvp')) {
-      if (method === 'GET') return await listRsvp(db)
+      if (method === 'GET') {
+        const query = getQuery(event)
+        return await listRsvp(db, query.name)
+      }
       if (method === 'POST') return await createRsvp(db, parseBody(event))
       return json({ ok: false, error: 'Method Not Allowed' }, 405)
     }

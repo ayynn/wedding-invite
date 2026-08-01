@@ -27,6 +27,12 @@ export function fetchRsvpList(endpoint: string): Promise<RsvpRecord[]> {
   return jsonRequest<RsvpRecord[]>(endpoint)
 }
 
+/** 按姓名查找已登记人员（同名检查） */
+export function lookupRsvpByName(endpoint: string, name: string): Promise<RsvpRecord[]> {
+  const url = `${endpoint}?name=${encodeURIComponent(name.trim())}`
+  return jsonRequest<RsvpRecord[]>(url)
+}
+
 /** 更新登记 */
 export function updateRsvp(
   endpoint: string,
@@ -42,6 +48,11 @@ export function updateRsvp(
 /** 删除登记 */
 export function deleteRsvp(endpoint: string, id: string): Promise<{ ok: boolean }> {
   return jsonRequest(`${endpoint}/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+/** 批量删除登记 */
+export async function deleteRsvpBatch(endpoint: string, ids: string[]): Promise<void> {
+  await Promise.all(ids.map((id) => deleteRsvp(endpoint, id)))
 }
 
 /** 获取图片墙列表 */
@@ -94,4 +105,17 @@ export async function updateWall(
 /** 删除图片墙条目 */
 export function deleteWall(endpoint: string, id: string): Promise<{ ok: boolean }> {
   return jsonRequest(`${endpoint}/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
+/** 批量删除图片墙条目 */
+export async function deleteWallBatch(endpoint: string, ids: string[]): Promise<void> {
+  await Promise.all(ids.map((id) => deleteWall(endpoint, id)))
+}
+
+/** 给图片墙点赞 */
+export function likeWall(
+  endpoint: string,
+  id: string
+): Promise<{ ok: boolean; likes: number }> {
+  return jsonRequest(`${endpoint}/${encodeURIComponent(id)}/like`, { method: 'POST', body: '{}' })
 }
