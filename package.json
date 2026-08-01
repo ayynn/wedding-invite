@@ -1,0 +1,28 @@
+{
+  "name": "wedding-invite",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "GMY & WJ 婚礼邀请函 · Vue3 + TypeScript + Vite 工程化项目",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "typecheck:functions": "tsc -p tsconfig.functions.json",
+    "deploy": "pnpm build && wrangler pages deploy dist --project-name wedding-invite"
+  },
+  "dependencies": {
+    "photoswipe": "^5.4.4",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260801.1",
+    "@types/node": "^26.1.2",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.7",
+    "vue-tsc": "^2.1.10",
+    "wrangler": "^4.118.0"
+  }
+}

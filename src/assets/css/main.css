@@ -1,0 +1,214 @@
+/* ============ 全局主题与基础 ============ */
+:root {
+  --green-deep: #1c2e24;
+  --green: #2d4a36;
+  --green-soft: #4a6b52;
+  --gold: #c9a86a;
+  --gold-light: #e8d5a3;
+  --gold-bright: #f7e7c3;
+  --cream: #faf6ee;
+  --ivory: #f3ecdd;
+  --brown: #8a7350;
+  --shadow: 0 16px 48px rgba(20, 40, 30, 0.18);
+  --radius: 18px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  background: var(--cream);
+  color: var(--green-deep);
+  overflow-x: hidden;
+  line-height: 1.8;
+  -webkit-text-size-adjust: 100%;
+}
+
+::selection {
+  background: var(--gold);
+  color: #fff;
+}
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ivory);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 8px;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* ============ 金色花体 Logo ============ */
+.gold-text {
+  background: linear-gradient(135deg, #fdf3d3 0%, #e8c98a 28%, #c9a86a 52%, #f0d9a8 74%, #b8904f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 3px 16px rgba(201, 168, 106, 0.4));
+}
+
+/* ============ 章节基础 ============ */
+.section {
+  position: relative;
+  padding: 92px 22px;
+  overflow: hidden;
+}
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+.sec-title-en {
+  font-family: 'Great Vibes', cursive;
+  font-size: clamp(38px, 7vw, 60px);
+  color: var(--gold);
+  line-height: 1.2;
+  text-align: center;
+}
+.sec-title-cn {
+  text-align: center;
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  margin-top: 6px;
+  color: var(--green-deep);
+}
+.sec-sub {
+  text-align: center;
+  color: var(--brown);
+  margin-top: 14px;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+}
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 26px auto;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  height: 1px;
+  width: 70px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+.divider::after {
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+.divider i {
+  color: var(--gold);
+  font-style: normal;
+  font-size: 16px;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+
+/* ============ 滚动渐显 ============ */
+.reveal {
+  opacity: 0;
+  transform: translateY(46px);
+  transition: opacity 1s ease, transform 1s cubic-bezier(0.2, 0.65, 0.3, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+.reveal.d1 { transition-delay: 0.12s; }
+.reveal.d2 { transition-delay: 0.24s; }
+.reveal.d3 { transition-delay: 0.36s; }
+
+/* ============ 粒子层 ============ */
+#petals,
+#fireflies {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 80;
+  overflow: hidden;
+}
+#fireflies {
+  z-index: 79;
+}
+.petal {
+  position: absolute;
+  top: -6vh;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation-name: petalFall;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+  box-shadow: 0 0 6px rgba(201, 168, 106, 0.25);
+}
+@keyframes petalFall {
+  0% {
+    transform: translate3d(0, -8vh, 0) rotate(0deg) scale(0.8);
+    opacity: 0;
+  }
+  8% { opacity: 0.75; }
+  100% {
+    transform: translate3d(var(--drift, 40px), 108vh, 0) rotate(var(--spin, 360deg)) scale(1.6);
+    opacity: 0.3;
+  }
+}
+.firefly {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff8d6 0%, #e8d5a3 40%, transparent 72%);
+  animation: fly 7s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+@keyframes fly {
+  0% { transform: translate3d(0, 0, 0); opacity: 0.15; }
+  50% { opacity: 0.85; }
+  100% { transform: translate3d(var(--fx, 30px), var(--fy, -40px), 0); opacity: 0.2; }
+}
+
+/* 光标光斑（仅精细指针设备） */
+#cursor-glow {
+  position: fixed;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 78;
+  background: radial-gradient(circle, rgba(201, 168, 106, 0.16) 0%, rgba(201, 168, 106, 0.05) 40%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.4s;
+  opacity: 0;
+}
+#cursor-glow.on {
+  opacity: 1;
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 640px) {
+  .section {
+    padding: 72px 18px;
+  }
+  .reveal {
+    transform: translateY(34px);
+  }
+}

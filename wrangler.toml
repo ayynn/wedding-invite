@@ -1,0 +1,19 @@
+# Cloudflare Pages 部署配置
+# 参考: https://developers.cloudflare.com/pages/functions/
+
+name = "wedding-invite"
+compatibility_date = "2025-06-01"
+
+# Pages 构建产物目录（pnpm build 输出）
+pages_build_output_dir = "dist"
+
+# ============================================================
+# KV 命名空间（RSVP + 图片墙存储）
+# 部署前执行:
+#   npx wrangler kv namespace create WEDDING_KV
+# 将返回的 id 填入下方，然后:
+#   npx wrangler pages deploy dist --project-name wedding-invite
+# ============================================================
+[[kv_namespaces]]
+binding = "WEDDING_KV"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
