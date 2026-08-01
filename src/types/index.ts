@@ -120,7 +120,7 @@ export interface WeddingConfig {
     /** 默认音量 0-1 */
     volume: number
   }
-  /** API 端点（Cloudflare Pages Functions 同域部署用相对路径） */
+  /** API 端点（CloudBase 同域部署用相对路径） */
   api: ApiConfig
   /** 图片墙 */
   wall: {

@@ -1,0 +1,15 @@
+{
+  "version": "2.0",
+  "envId": "wedding-invite-d9gdvtmrr73ff6b75",
+  "functionRoot": "cloudbase/functions",
+  "functions": [
+    {
+      "name": "wedding-api",
+      "timeout": 60,
+      "runtime": "Nodejs18.15",
+      "memorySize": 256,
+      "handler": "index.main",
+      "installDependency": true
+    }
+  ]
+}

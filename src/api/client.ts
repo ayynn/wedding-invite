@@ -25,7 +25,23 @@ export async function fetchWall(endpoint: string): Promise<WallItem[]> {
   return jsonRequest<WallItem[]>(endpoint)
 }
 
-/** 上传图片到图片墙 */
-export function uploadWall(endpoint: string, payload: WallUploadPayload): Promise<{ ok: boolean; id?: string }> {
-  return jsonRequest(endpoint, { method: 'POST', body: JSON.stringify(payload) })
+/**
+ * 上传图片到图片墙
+ * CloudBase 对 application/json 请求体限制约 100KB；
+ * 图片 base64 必须用 octet-stream（非文本通道，上限约 6MB）。
+ */
+export async function uploadWall(
+  endpoint: string,
+  payload: WallUploadPayload
+): Promise<{ ok: boolean; id?: string }> {
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/octet-stream' },
+    body: JSON.stringify(payload)
+  })
+  if (!isOk(res)) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`请求失败(${res.status}): ${text.slice(0, 120)}`)
+  }
+  return (await res.json()) as { ok: boolean; id?: string }
 }

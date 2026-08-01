@@ -103,7 +103,8 @@ async function onSubmit(): Promise<void> {
     return
   }
   if (file.size > props.maxBytes) {
-    uploadError.value = '图片超过 4MB，请换一张小一点的'
+    const mb = Math.round(props.maxBytes / (1024 * 1024))
+    uploadError.value = `图片超过 ${mb}MB，请换一张小一点的`
     return
   }
   if (!form.name.trim()) {
@@ -132,7 +133,12 @@ async function onSubmit(): Promise<void> {
     if (fileInput.value) fileInput.value.value = ''
     await loadWall()
   } catch (err) {
-    uploadError.value = '上传失败，请稍后重试'
+    const msg = err instanceof Error ? err.message : ''
+    if (msg.includes('(413)') || msg.includes('EXCEED_MAX_PAYLOAD_SIZE')) {
+      uploadError.value = '图片过大，请换一张更小的照片后重试'
+    } else {
+      uploadError.value = '上传失败，请稍后重试'
+    }
     console.warn('[Wall] 上传失败:', err)
   } finally {
     uploading.value = false

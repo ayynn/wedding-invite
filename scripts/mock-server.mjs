@@ -1,6 +1,6 @@
 /**
- * 本地开发模拟后端（模拟 Cloudflare Pages Functions + KV）
- * 用途：在无 Cloudflare 环境时本地验证 /api/rsvp、/api/wall、/wall/:id 交互
+ * 本地开发模拟后端（内存存储）
+ * 用途：本地验证 /api/rsvp、/api/wall、/wall/:id 交互
  * 运行：node scripts/mock-server.mjs [port]
  */
 import http from 'node:http'
@@ -139,5 +139,5 @@ const server = http.createServer(async (req, res) => {
 })
 
 server.listen(PORT, () => {
-  console.log(`[mock-server] http://localhost:${PORT}  (模拟 Cloudflare Pages + KV)`)
+  console.log(`[mock-server] http://localhost:${PORT}  (本地模拟 API)`)
 })

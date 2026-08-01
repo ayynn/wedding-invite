@@ -81,8 +81,8 @@ export const weddingConfig: WeddingConfig = {
 
   /**
    * API 端点
-   * Cloudflare Pages + Functions 同域部署：使用相对路径即可
-   * 独立部署后端时改为绝对地址，如 https://your-worker.workers.dev/api/...
+   * CloudBase 同域部署：使用相对路径即可
+   * 独立部署后端时改为绝对地址
    */
   api: {
     rsvpEndpoint: '/api/rsvp',
@@ -95,6 +95,7 @@ export const weddingConfig: WeddingConfig = {
     en: 'Photo Wall',
     sub: '把你们镜头里的美好，留在这面墙上',
     maxSize: 1280,
-    maxBytes: 4 * 1024 * 1024
+    /** 与云函数 MAX_IMG_BYTES 对齐；base64 膨胀后仍需落在 SCF 非文本 6MB 内 */
+    maxBytes: 3 * 1024 * 1024
   }
 }

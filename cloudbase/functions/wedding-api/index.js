@@ -1,0 +1,229 @@
+/**
+ * CloudBase 云函数：RSVP + 图片墙
+ * 通过 HTTP 网关挂载 /api/rsvp、/api/wall、/wall/*
+ */
+const cloud = require('@cloudbase/node-sdk')
+
+const MAX_IMG_BYTES = 3 * 1024 * 1024
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type'
+}
+
+function getApp() {
+  return cloud.init({ env: cloud.SYMBOL_CURRENT_ENV })
+}
+
+function json(data, statusCode = 200) {
+  return {
+    statusCode,
+    headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+    body: JSON.stringify(data)
+  }
+}
+
+function binary(buf, mime) {
+  return {
+    statusCode: 200,
+    isBase64Encoded: true,
+    headers: {
+      'Content-Type': mime || 'application/octet-stream',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      ...CORS
+    },
+    body: Buffer.from(buf).toString('base64')
+  }
+}
+
+function notFound() {
+  return {
+    statusCode: 404,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', ...CORS },
+    body: 'Not Found'
+  }
+}
+
+function getPath(event) {
+  const raw =
+    event.path ||
+    event.requestContext?.path ||
+    event.requestContext?.http?.path ||
+    event.url ||
+    '/'
+  try {
+    if (raw.startsWith('http')) return new URL(raw).pathname
+  } catch {
+    /* ignore */
+  }
+  return raw.split('?')[0] || '/'
+}
+
+function getMethod(event) {
+  return (
+    event.httpMethod ||
+    event.requestContext?.httpMethod ||
+    event.requestContext?.http?.method ||
+    event.method ||
+    'GET'
+  ).toUpperCase()
+}
+
+function parseBody(event) {
+  let raw = event.body
+  if (raw == null || raw === '') return null
+  if (event.isBase64Encoded && typeof raw === 'string') {
+    raw = Buffer.from(raw, 'base64').toString('utf8')
+  }
+  if (typeof raw === 'object') return raw
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+function mimeToExt(mime) {
+  if (mime === 'image/png') return 'png'
+  if (mime === 'image/webp') return 'webp'
+  return 'jpg'
+}
+
+function makeId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2, 10)}`
+}
+
+async function listRsvp(db) {
+  const { data } = await db.collection('rsvp').limit(1000).get()
+  return json(data || [])
+}
+
+async function createRsvp(db, body) {
+  if (!body || typeof body.name !== 'string' || !body.name.trim()) {
+    return json({ ok: false, error: '缺少姓名' }, 400)
+  }
+  const id = makeId()
+  const record = {
+    id,
+    name: body.name.trim().slice(0, 40),
+    phone: (body.phone ?? '').toString().slice(0, 30),
+    num: (body.num ?? '').toString().slice(0, 10),
+    attend: body.attend === 'no' ? 'no' : 'yes',
+    msg: (body.msg ?? '').toString().slice(0, 300),
+    time: body.time ?? new Date().toISOString()
+  }
+  await db.collection('rsvp').doc(id).set(record)
+  return json({ ok: true, id })
+}
+
+async function listWall(db) {
+  let data = []
+  try {
+    ;({ data } = await db.collection('wall').orderBy('createdAt', 'desc').limit(500).get())
+  } catch {
+    ;({ data } = await db.collection('wall').limit(500).get())
+  }
+  const items = (data || [])
+    .map((meta) => ({
+      id: meta.id || meta._id,
+      name: meta.name,
+      caption: meta.caption,
+      url: `/wall/${meta.id || meta._id}`,
+      width: meta.width,
+      height: meta.height,
+      createdAt: meta.createdAt
+    }))
+    .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+  return json(items)
+}
+
+async function createWall(app, db, body) {
+  if (!body || typeof body.name !== 'string' || !body.name.trim()) {
+    return json({ ok: false, error: '缺少昵称' }, 400)
+  }
+  if (typeof body.image !== 'string' || !body.image.startsWith('data:image')) {
+    return json({ ok: false, error: '缺少图片数据' }, 400)
+  }
+
+  const [header, b64] = body.image.split(',')
+  const mime = header.replace('data:', '').replace(';base64', '') || 'image/jpeg'
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(mime)) {
+    return json({ ok: false, error: '仅支持 JPG / PNG / WebP' }, 400)
+  }
+  if (Math.round((b64?.length || 0) * 0.75) > MAX_IMG_BYTES) {
+    return json({ ok: false, error: '图片过大' }, 400)
+  }
+
+  const id = makeId()
+  const createdAt = new Date().toISOString()
+  const ext = mimeToExt(mime)
+  const cloudPath = `wall/${id}.${ext}`
+
+  const upload = await app.uploadFile({
+    cloudPath,
+    fileContent: Buffer.from(b64, 'base64')
+  })
+  if (!upload.fileID) {
+    return json({ ok: false, error: '图片上传失败' }, 500)
+  }
+
+  const meta = {
+    id,
+    name: body.name.trim().slice(0, 20),
+    caption: (body.caption ?? '').trim().slice(0, 60),
+    width: Math.max(1, Math.round(body.width ?? 1280)),
+    height: Math.max(1, Math.round(body.height ?? 853)),
+    mime,
+    fileID: upload.fileID,
+    cloudPath,
+    createdAt
+  }
+  await db.collection('wall').doc(id).set(meta)
+  return json({ ok: true, id })
+}
+
+async function getWallImage(app, db, id) {
+  if (!id) return notFound()
+  const { data } = await db.collection('wall').doc(id).get()
+  const meta = Array.isArray(data) ? data[0] : data
+  if (!meta?.fileID) return notFound()
+
+  const file = await app.downloadFile({ fileID: meta.fileID })
+  if (!file.fileContent) return notFound()
+  return binary(file.fileContent, meta.mime || 'image/jpeg')
+}
+
+exports.main = async (event) => {
+  const method = getMethod(event)
+  if (method === 'OPTIONS') {
+    return { statusCode: 204, headers: CORS, body: '' }
+  }
+
+  const path = getPath(event)
+  const app = getApp()
+  const db = app.database()
+
+  try {
+    if (path === '/api/rsvp' || path.endsWith('/api/rsvp')) {
+      if (method === 'GET') return await listRsvp(db)
+      if (method === 'POST') return await createRsvp(db, parseBody(event))
+      return json({ ok: false, error: 'Method Not Allowed' }, 405)
+    }
+
+    if (path === '/api/wall' || path.endsWith('/api/wall')) {
+      if (method === 'GET') return await listWall(db)
+      if (method === 'POST') return await createWall(app, db, parseBody(event))
+      return json({ ok: false, error: 'Method Not Allowed' }, 405)
+    }
+
+    const wallMatch = path.match(/\/wall\/([^/]+)\/?$/)
+    if (wallMatch && method === 'GET') {
+      return await getWallImage(app, db, decodeURIComponent(wallMatch[1]))
+    }
+
+    return notFound()
+  } catch (err) {
+    console.error('wedding-api error', err)
+    return json({ ok: false, error: err?.message || '服务器错误' }, 500)
+  }
+}
