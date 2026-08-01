@@ -9,13 +9,16 @@
     "build": "vue-tsc -b && vite build",
     "build:web": "vue-tsc -b && vite build",
     "preview": "vite preview",
+    "mock": "node scripts/mock-server.mjs",
     "typecheck": "vue-tsc --noEmit",
     "deploy": "node scripts/deploy-cloudbase.mjs",
     "deploy:cloudbase": "node scripts/deploy-cloudbase.mjs"
   },
   "dependencies": {
+    "echarts": "^6.1.0",
     "photoswipe": "^5.4.4",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",
