@@ -6,11 +6,11 @@
   "description": "GMY & WJ 婚礼邀请函 · Vue3 + TypeScript + Vite 工程化项目",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vue-tsc -b && vite build && wrangler pages functions build --outdir=./dist/_worker.js",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
     "typecheck:functions": "tsc -p tsconfig.functions.json",
-    "deploy": "pnpm build && wrangler pages deploy dist --project-name wedding-invite"
+    "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
     "photoswipe": "^5.4.4",

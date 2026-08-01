@@ -1,19 +1,20 @@
-# Cloudflare Pages 部署配置
-# 参考: https://developers.cloudflare.com/pages/functions/
+# Cloudflare Workers 部署配置（静态资源 + Pages Functions 编译产物）
+# 参考: https://developers.cloudflare.com/workers/static-assets/
 
 name = "wedding-invite"
 compatibility_date = "2025-06-01"
+main = "./dist/_worker.js"
 
-# Pages 构建产物目录（pnpm build 输出）
-pages_build_output_dir = "dist"
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+# API / 图片墙走 Worker，其余交给静态资源（SPA）
+run_worker_first = ["/api/*", "/wall/*"]
 
 # ============================================================
 # KV 命名空间（RSVP + 图片墙存储）
-# 部署前执行:
-#   npx wrangler kv namespace create WEDDING_KV
-# 将返回的 id 填入下方，然后:
-#   npx wrangler pages deploy dist --project-name wedding-invite
 # ============================================================
 [[kv_namespaces]]
 binding = "WEDDING_KV"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "fe2f91ce659d459c9898b0436b82971e"
