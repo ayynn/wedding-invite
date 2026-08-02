@@ -1,4 +1,4 @@
-import type { WeddingConfig } from '@/types'
+import type { WeddingConfig } from '@/types';
 
 /**
  * 婚礼邀请函配置中心
@@ -11,16 +11,16 @@ export const weddingConfig: WeddingConfig = {
       initial: 'WJ',
       name: '吴极',
       nameSpaced: '吴 极',
-      motto: '沉稳如林 · 温柔似风'
+      motto: '沉稳如林 · 温柔似风',
     },
     bride: {
       initial: 'GMY',
       name: '高旻洋',
       nameSpaced: '高 旻 洋',
-      motto: '明媚如光 · 温婉若溪'
+      motto: '明媚如光 · 温婉若溪',
     },
     logoParts: ['GMY', '&', 'WJ'],
-    names: '吴极 · 高旻洋'
+    names: '吴极 · 高旻洋',
   },
 
   weddingDate: '2026-10-18T14:00:00+08:00',
@@ -30,18 +30,23 @@ export const weddingConfig: WeddingConfig = {
   venue: {
     name: '上海 · 阿丽那野奢度假庄园',
     address: '上海浦东新区笋王路168号',
-    mapUrl: 'https://apis.map.qq.com/uri/v1/geocoder?coord=31.0289,121.5983&referer=wedding',
-    transitHint: '距新场地铁站约 5.8 公里，建议自驾或拼车前往。'
+    mapUrl:
+      'https://apis.map.qq.com/uri/v1/geocoder?coord=31.011364,121.663706&referer=wedding',
+    transitHint: '距新场地铁站约 5.8 公里，建议自驾或拼车前往。',
   },
 
   loveStory: [
     '从青涩初见，到余生有约。',
     '我们决定，把往后所有的春夏秋冬，都交给彼此。',
-    '诚邀您见证我们的誓言，共享这一场森林中的浪漫。'
+    '诚邀您见证我们的誓言，共享这一场森林中的浪漫。',
   ],
 
   gallery: [
-    { src: '/imgs/venue_01.jpg', caption: '梦幻池畔 · 婚礼仪式区', span: 'g-1' },
+    {
+      src: '/imgs/venue_01.jpg',
+      caption: '梦幻池畔 · 婚礼仪式区',
+      span: 'g-1',
+    },
     { src: '/imgs/venue_02.jpg', caption: '森林泳池 · 倒影如画', span: 'g-2' },
     { src: '/imgs/venue_10.jpg', caption: '玻璃花房 · 浪漫迎宾', span: 'g-2' },
     { src: '/imgs/venue_09.jpg', caption: '大客厅 · 宴客厅', span: 'g-2' },
@@ -52,31 +57,75 @@ export const weddingConfig: WeddingConfig = {
     { src: '/imgs/venue_24.jpg', caption: '池畔休闲 · 星光晚宴', span: 'g-2' },
     { src: '/imgs/venue_31.jpg', caption: '木屋黄昏 · 静谧时光', span: 'g-1' },
     { src: '/imgs/venue_18.jpg', caption: '玻璃花房内景', span: 'g-2' },
-    { src: '/imgs/venue_33.jpg', caption: '庄园夜色 · 灯火可亲', span: 'g-2' }
+    { src: '/imgs/venue_33.jpg', caption: '庄园夜色 · 灯火可亲', span: 'g-2' },
   ],
 
   schedule: [
-    { time: '14:00', title: '庄园迎宾 · 自由打卡', desc: '森林草坪、景观泳池与玻璃花房已备好茶歇，欢迎提前到场，留下最美合影。' },
-    { time: '16:08', title: '草坪仪式', desc: '在绿意与阳光之间，交换誓言，许下此生之约。' },
-    { time: '17:30', title: '合影时光', desc: '与新人同框，将这一刻定格成永恒。' },
-    { time: '18:18', title: '晚宴 · 玻璃星空厅', desc: '灯火与星光交织，举杯共庆，感谢每一份祝福。' },
-    { time: '20:30', title: 'after party · 泳池星光', desc: '音乐、篝火与星光，把美好延续到夜深。' }
+    {
+      time: '14:00',
+      title: '庄园迎宾 · 自由打卡',
+      desc: '森林草坪、景观泳池与玻璃花房已备好茶歇，欢迎提前到场，留下最美合影。',
+    },
+    {
+      time: '16:08',
+      title: '草坪仪式',
+      desc: '在绿意与阳光之间，交换誓言，许下此生之约。',
+    },
+    {
+      time: '17:30',
+      title: '合影时光',
+      desc: '与新人同框，将这一刻定格成永恒。',
+    },
+    {
+      time: '18:18',
+      title: '晚宴 · 玻璃星空厅',
+      desc: '灯火与星光交织，举杯共庆，感谢每一份祝福。',
+    },
+    {
+      time: '20:30',
+      title: 'after party · 泳池星光',
+      desc: '音乐、篝火与星光，把美好延续到夜深。',
+    },
   ],
 
   tips: [
-    { icon: 'location', title: '交通出行', desc: '导航至「上海阿丽那野奢度假庄园」（浦东新区笋王路168号）。距新场地铁站约 5.8 公里，建议自驾或拼车前往。' },
-    { icon: 'home', title: '住宿安排', desc: '庄园提供森林木屋与景观客房，外埠亲友如需住宿请提前告知，我们为您预留房间。' },
-    { icon: 'attire', title: '着装建议', desc: '户外草坪与池畔场景较多，建议着装轻盈舒适，浅色系与庄园更配哦。' },
-    { icon: 'camera', title: '留影分享', desc: '欢迎把您镜头里的美好瞬间发给我们，也可现场扫二维码上传至共享相册。' },
-    { icon: 'love', title: '宠物友好', desc: '庄园欢迎毛孩子同行，请牵好牵引绳，共同守护这份自然之美。' },
-    { icon: 'phone', title: '联系我们', desc: '有任何疑问请联系我们：吴极 138-0000-0000 / 高旻洋 138-0000-0001' }
+    {
+      icon: 'location',
+      title: '交通出行',
+      desc: '导航至「上海阿丽那野奢度假庄园」（浦东新区笋王路168号）。距新场地铁站约 5.8 公里，建议自驾或拼车前往。',
+    },
+    {
+      icon: 'home',
+      title: '住宿安排',
+      desc: '庄园提供森林木屋与景观客房，外埠亲友如需住宿请提前告知，我们为您预留房间。',
+    },
+    {
+      icon: 'attire',
+      title: '着装建议',
+      desc: '户外草坪与池畔场景较多，建议着装轻盈舒适，浅色系与庄园更配哦。',
+    },
+    {
+      icon: 'camera',
+      title: '留影分享',
+      desc: '欢迎把您镜头里的美好瞬间发给我们，也可现场扫二维码上传至共享相册。',
+    },
+    {
+      icon: 'love',
+      title: '宠物友好',
+      desc: '庄园欢迎毛孩子同行，请牵好牵引绳，共同守护这份自然之美。',
+    },
+    {
+      icon: 'phone',
+      title: '联系我们',
+      desc: '有任何疑问请联系我们：吴极 150-218-29298 / 高旻洋 159-0009-55906',
+    },
   ],
 
   bgm: {
     src: '/audio/bgm.mp3',
     title: 'Palpitation!',
     artist: '梶浦由記',
-    volume: 0.5
+    volume: 0.5,
   },
 
   /**
@@ -86,7 +135,7 @@ export const weddingConfig: WeddingConfig = {
    */
   api: {
     rsvpEndpoint: '/api/rsvp',
-    wallEndpoint: '/api/wall'
+    wallEndpoint: '/api/wall',
   },
 
   /** 图片墙 */
@@ -96,6 +145,20 @@ export const weddingConfig: WeddingConfig = {
     sub: '把你们镜头里的美好，留在这面墙上',
     maxSize: 1280,
     /** 与云函数 MAX_IMG_BYTES 对齐；base64 膨胀后仍需落在 SCF 非文本 6MB 内 */
-    maxBytes: 3 * 1024 * 1024
-  }
-}
+    maxBytes: 3 * 1024 * 1024,
+  },
+
+  /**
+   * 分享给朋友（微信内引导右上角菜单；站外优先系统分享 / 复制链接 / 二维码）
+   * 微信链接卡片图：依赖 index.html / applyShareMeta 的 og:image（绝对 HTTPS）。
+   * 页面已打开后由 JS 定制分享卡需公众号 JS-SDK，本项目未接入。
+   */
+  share: {
+    url: 'https://wedding-invite-d9gdvtmrr73ff6b75-1461874135.ap-shanghai.app.tcloudbase.com',
+    title: 'GMY & WJ · 我们结婚啦',
+    text: '吴极 & 高旻洋 婚礼邀请 · 2026.10.18 · 上海阿丽那野奢度假庄园',
+    /** 运行 pnpm share:qr 可重新生成 public/share/og-cover.png */
+    image: '/share/og-cover.png',
+    qrImage: '/share/invite-card.png',
+  },
+};

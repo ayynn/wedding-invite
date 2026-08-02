@@ -162,7 +162,7 @@ onUnmounted(() => {
   background: linear-gradient(135deg, var(--gold-light), var(--gold));
   color: #fff;
   font-size: 30px;
-  font-family: 'Great Vibes', cursive;
+  font-family: var(--font-script);
 }
 
 /* 灯箱 */

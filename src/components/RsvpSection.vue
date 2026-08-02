@@ -5,6 +5,7 @@ import { reactive, ref } from 'vue'
 import { lookupRsvpByName, submitRsvp, type RsvpRecord } from '@/api/client'
 import type { RsvpPayload } from '@/types'
 import SectionTitle from './SectionTitle.vue'
+import ShareInviteButton from './ShareInviteButton.vue'
 
 const props = defineProps<{
   endpoint: string
@@ -121,6 +122,7 @@ async function confirmNotSameAndSubmit(): Promise<void> {
         <button class="submit" type="submit" :disabled="submitting">
           {{ submitting ? '提交中…' : '✦ 送出祝福 ✦' }}
         </button>
+        <ShareInviteButton />
       </form>
       <div v-else class="form-ok">
         <div class="ok-ic">
@@ -131,6 +133,9 @@ async function confirmNotSameAndSubmit(): Promise<void> {
         </div>
         <h3>已收到您的回复</h3>
         <p>感谢您的祝福，我们婚礼见！</p>
+        <div class="ok-share">
+          <ShareInviteButton />
+        </div>
       </div>
     </div>
 
@@ -181,7 +186,7 @@ async function confirmNotSameAndSubmit(): Promise<void> {
   border: 1px solid rgba(201, 168, 106, 0.45);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.75);
-  font-family: inherit;
+  font-family: var(--font-serif);
   font-size: 14px;
   color: var(--green-deep);
   margin-bottom: 16px;
@@ -214,7 +219,8 @@ async function confirmNotSameAndSubmit(): Promise<void> {
   border: 1px solid rgba(201, 168, 106, 0.45);
   border-radius: 12px;
   cursor: pointer;
-  font-size: 14px;
+  font-family: var(--font-hand);
+  font-size: 16px;
   transition: 0.3s;
   background: rgba(255, 255, 255, 0.6);
 }
@@ -240,9 +246,9 @@ async function confirmNotSameAndSubmit(): Promise<void> {
   border-radius: 60px;
   background: var(--green);
   color: var(--ivory);
-  font-family: inherit;
-  font-size: 15px;
-  letter-spacing: 0.3em;
+  font-family: var(--font-hand);
+  font-size: 18px;
+  letter-spacing: 0.16em;
   cursor: pointer;
   transition: 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
   box-shadow: 0 10px 30px rgba(45, 74, 54, 0.3);
@@ -278,15 +284,22 @@ async function confirmNotSameAndSubmit(): Promise<void> {
   height: 100%;
 }
 .form-ok h3 {
-  font-size: 22px;
+  font-family: var(--font-hand);
+  font-size: 26px;
+  font-weight: 400;
   margin-top: 18px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.12em;
   color: var(--green-deep);
 }
 .form-ok p {
+  font-family: var(--font-hand);
   color: var(--brown);
-  font-size: 14px;
+  font-size: 16px;
   margin-top: 10px;
+}
+.ok-share {
+  max-width: 320px;
+  margin: 28px auto 0;
 }
 .dup-mask {
   position: fixed;

@@ -134,4 +134,20 @@ export interface WeddingConfig {
     /** 单张图片最大体积（字节，超出提示） */
     maxBytes: number
   }
+  /** 分享给朋友 */
+  share: {
+    /** 对外分享链接（建议使用线上正式地址） */
+    url: string
+    /** 分享标题 */
+    title: string
+    /** 分享描述 */
+    text: string
+    /**
+     * 微信/OG 分享缩略图（public 下路径，约 1:1）。
+     * 链接预览依赖页面 meta 的绝对 HTTPS og:image；微信内 JS 改写分享卡需公众号 JS-SDK。
+     */
+    image: string
+    /** 分享二维码卡片图（public 下路径） */
+    qrImage: string
+  }
 }

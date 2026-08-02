@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: 'couple-section' })
+
 import type { CoupleMember } from '@/types'
 import SectionTitle from './SectionTitle.vue'
 
@@ -19,7 +21,7 @@ defineProps<{
             <span class="halo"></span>
             <div class="initials">{{ groom.initial }}</div>
           </div>
-          <h3>{{ groom.initial }}<span class="cn">{{ groom.name }}</span></h3>
+          <h3>{{ groom.initial }}<span class="cn couple-name">{{ groom.name }}</span></h3>
           <div class="line"></div>
           <p>{{ groom.motto }}</p>
         </div>
@@ -29,7 +31,7 @@ defineProps<{
             <span class="halo"></span>
             <div class="initials">{{ bride.initial }}</div>
           </div>
-          <h3>{{ bride.initial }}<span class="cn">{{ bride.name }}</span></h3>
+          <h3>{{ bride.initial }}<span class="cn couple-name">{{ bride.name }}</span></h3>
           <div class="line"></div>
           <p>{{ bride.motto }}</p>
         </div>
@@ -77,7 +79,7 @@ defineProps<{
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at 35% 30%, var(--gold-light), var(--gold) 70%);
-  font-family: 'Great Vibes', cursive;
+  font-family: var(--font-script);
   font-size: 46px;
   color: #fff;
   text-shadow: 0 3px 12px rgba(120, 90, 40, 0.45);
@@ -94,23 +96,23 @@ defineProps<{
 }
 .couple-item h3 {
   font-size: clamp(24px, 5vw, 32px);
-  font-family: 'Great Vibes', cursive;
+  font-family: var(--font-script);
   color: var(--green);
   font-weight: 600;
 }
 .couple-item h3 .cn {
   display: block;
-  font-family: 'Noto Serif SC', serif;
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: 0.3em;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
   color: var(--green-deep);
   margin-top: 2px;
 }
 .couple-item p {
+  font-family: var(--font-hand);
   color: var(--brown);
-  font-size: 13px;
-  letter-spacing: 0.22em;
+  font-size: 15px;
+  letter-spacing: 0.12em;
   margin-top: 6px;
 }
 .line {
@@ -122,7 +124,7 @@ defineProps<{
 .ampersand {
   flex: 0 0 auto;
   align-self: center;
-  font-family: 'Great Vibes', cursive;
+  font-family: var(--font-script);
   font-size: 64px;
   color: var(--gold);
   padding: 0 18px;
@@ -130,12 +132,14 @@ defineProps<{
   text-shadow: 0 6px 24px rgba(201, 168, 106, 0.4);
 }
 .couple-love {
+  font-family: var(--font-hand);
   max-width: 620px;
   margin: 36px auto 0;
   text-align: center;
   color: #44544a;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 2.2;
+  letter-spacing: 0.06em;
 }
 @media (max-width: 640px) {
   .ampersand {

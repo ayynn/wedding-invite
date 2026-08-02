@@ -65,8 +65,10 @@ defineProps<{
   transform: scale(1.1);
 }
 .tip-card h4 {
-  font-size: 16px;
-  letter-spacing: 0.16em;
+  font-family: var(--font-hand);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
   margin-bottom: 8px;
 }
 .tip-card p {

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 defineOptions({ name: 'cover-section' })
 
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import type { WeddingConfig } from '@/types'
-import { ADMIN_SECRET_HOLD_MS, ADMIN_SECRET_NAME } from '@/config/admin'
 
 defineProps<{
   config: WeddingConfig
@@ -17,96 +16,51 @@ const emit = defineEmits<{
 
 const router = useRouter()
 
-/** 新郎名可编辑：改为「长安新郎」并保持 10 秒进入后台 */
-const editing = ref(false)
-const groomDraft = ref('')
-const holdProgress = ref(0)
-const holdReady = ref(false)
-
-let holdTimer: number | null = null
-let holdRaf: number | null = null
-let holdStartedAt = 0
+/** 顶部「婚礼邀请」双击 / 双击进入后台登录页 */
+const DOUBLE_TAP_MS = 320
+let lastTitleTapAt = 0
 let scrollFired = false
 let scrollHandler: (() => void) | null = null
 let touchHandler: (() => void) | null = null
 
-const progressDeg = computed(() => Math.round(holdProgress.value * 360))
+function goAdminLogin(): void {
+  lastTitleTapAt = 0
+  void router.push({ name: 'admin-login' })
+}
 
-function clearHold(): void {
-  if (holdTimer != null) {
-    window.clearTimeout(holdTimer)
-    holdTimer = null
+function onTitleTap(e: Event): void {
+  e.stopPropagation()
+  const now = Date.now()
+  if (now - lastTitleTapAt <= DOUBLE_TAP_MS) {
+    goAdminLogin()
+    return
   }
-  if (holdRaf != null) {
-    window.cancelAnimationFrame(holdRaf)
-    holdRaf = null
-  }
-  holdProgress.value = 0
-  holdReady.value = false
+  lastTitleTapAt = now
 }
 
-function tickHold(): void {
-  const elapsed = Date.now() - holdStartedAt
-  holdProgress.value = Math.min(1, elapsed / ADMIN_SECRET_HOLD_MS)
-  if (holdProgress.value < 1) {
-    holdRaf = window.requestAnimationFrame(tickHold)
-  }
-}
-
-function startHold(): void {
-  clearHold()
-  holdStartedAt = Date.now()
-  holdReady.value = true
-  holdRaf = window.requestAnimationFrame(tickHold)
-  holdTimer = window.setTimeout(() => {
-    clearHold()
-    editing.value = false
-    void router.push({ name: 'admin-login' })
-  }, ADMIN_SECRET_HOLD_MS)
-}
-
-function onGroomDraftInput(): void {
-  if (groomDraft.value.trim() === ADMIN_SECRET_NAME) startHold()
-  else clearHold()
-}
-
-function beginEdit(e: Event): void {
+function onTitleDblClick(e: Event): void {
   e.stopPropagation()
   e.preventDefault()
-  editing.value = true
-  groomDraft.value = ''
-  clearHold()
-}
-
-function cancelEdit(e?: Event): void {
-  e?.stopPropagation()
-  editing.value = false
-  groomDraft.value = ''
-  clearHold()
+  goAdminLogin()
 }
 
 function onScroll(): void {
-  if (scrollFired || editing.value || window.scrollY <= 34) return
+  if (scrollFired || window.scrollY <= 34) return
   scrollFired = true
   emit('open')
 }
-
-watch(editing, (v) => {
-  if (v) scrollFired = true
-})
 
 onMounted(() => {
   scrollHandler = onScroll
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('wheel', onScroll, { passive: true })
   touchHandler = () => {
-    if (!editing.value && window.scrollY > 0) onScroll()
+    if (window.scrollY > 0) onScroll()
   }
   window.addEventListener('touchmove', touchHandler, { passive: true })
 })
 
 onUnmounted(() => {
-  clearHold()
   if (scrollHandler) window.removeEventListener('scroll', scrollHandler)
   window.removeEventListener('wheel', onScroll)
   if (touchHandler) window.removeEventListener('touchmove', touchHandler)
@@ -114,8 +68,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header class="cover" :class="{ leaving: opened }" @click="!editing && emit('open')">
-    <div class="cover-top">INVITATION&nbsp;&nbsp;·&nbsp;&nbsp;婚礼邀请</div>
+  <header class="cover" :class="{ leaving: opened }" @click="emit('open')">
+    <div
+      class="cover-top"
+      @click="onTitleTap"
+      @dblclick="onTitleDblClick"
+    >INVITATION&nbsp;&nbsp;·&nbsp;&nbsp;婚礼邀请</div>
     <div class="cover-inner">
       <div class="cover-logo-wrap">
         <div class="cover-ring"></div>
@@ -128,38 +86,10 @@ onUnmounted(() => {
         </div>
         <div class="cover-ornament">❦</div>
         <div class="cover-names">
-          <span
-            v-if="!editing"
-            class="groom-name"
-            title="长按编辑"
-            @click.stop="beginEdit"
-            @pointerdown.stop
-          >
-            <b>{{ config.couple.groom.nameSpaced }}</b>
-          </span>
-          <span v-else class="groom-edit" @click.stop>
-            <span
-              class="hold-ring"
-              :class="{ on: holdReady }"
-              :style="{ '--deg': progressDeg + 'deg' }"
-            ></span>
-            <input
-              v-model="groomDraft"
-              class="groom-input"
-              type="text"
-              maxlength="12"
-              placeholder="新郎之名"
-              autofocus
-              @input="onGroomDraftInput"
-              @keydown.escape="cancelEdit"
-              @click.stop
-            />
-            <button type="button" class="groom-cancel" @click="cancelEdit">✕</button>
-          </span>
+          <b class="couple-name">{{ config.couple.groom.nameSpaced }}</b>
           <span class="sep">·</span>
-          <b>{{ config.couple.bride.nameSpaced }}</b>
+          <b class="couple-name">{{ config.couple.bride.nameSpaced }}</b>
         </div>
-        <p v-if="holdReady" class="hold-hint">已锁定密钥 · {{ Math.ceil((1 - holdProgress) * 10) }}s 进入后台</p>
       </div>
       <div class="cover-date">{{ config.dateText }}</div>
       <div class="cover-venue">{{ config.venue.name }}</div>
@@ -202,9 +132,17 @@ onUnmounted(() => {
   width: 100%;
   text-align: center;
   z-index: 3;
-  font-size: 13px;
-  letter-spacing: 0.5em;
+  font-family: var(--font-hand);
+  font-size: 15px;
+  letter-spacing: 0.28em;
   color: rgba(250, 246, 238, 0.8);
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  /* 扩大可点区域，方便移动端双击 */
+  padding: 12px 16px;
+  margin-top: -12px;
 }
 .cover-inner {
   position: relative;
@@ -218,7 +156,7 @@ onUnmounted(() => {
   margin-bottom: 34px;
 }
 .cover-logo {
-  font-family: 'Great Vibes', cursive;
+  font-family: var(--font-script);
   font-size: clamp(54px, 14vw, 104px);
   line-height: 1.4;
   letter-spacing: 0.02em;
@@ -253,13 +191,12 @@ onUnmounted(() => {
   background: linear-gradient(90deg, var(--gold-light), transparent);
 }
 .cover-names {
-  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
-  font-size: clamp(23px, 5.4vw, 28px);
-  font-weight: 500;
-  letter-spacing: 0.5em;
+  font-size: clamp(26px, 6vw, 34px);
+  font-weight: 400;
+  letter-spacing: 0.22em;
   color: var(--gold-bright);
   margin-top: 20px;
-  text-indent: 0.5em;
+  text-indent: 0.22em;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
@@ -268,80 +205,11 @@ onUnmounted(() => {
   gap: 0;
 }
 .cover-names b {
-  font-weight: 500;
+  font-weight: 400;
 }
 .cover-names .sep {
   opacity: 0.7;
   margin: 0 0.1em;
-}
-.groom-name {
-  cursor: text;
-  border-radius: 4px;
-  transition: background 0.2s ease;
-}
-.groom-name:hover {
-  background: rgba(232, 213, 163, 0.12);
-}
-.groom-edit {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-indent: 0;
-  letter-spacing: 0;
-}
-.hold-ring {
-  position: absolute;
-  inset: -10px -14px;
-  border-radius: 12px;
-  opacity: 0;
-  pointer-events: none;
-  background: conic-gradient(var(--gold-light) var(--deg), transparent 0);
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
-  padding: 2px;
-  transition: opacity 0.25s ease;
-}
-.hold-ring.on {
-  opacity: 1;
-}
-.groom-input {
-  width: 7.5em;
-  padding: 4px 8px;
-  border: 1px solid rgba(232, 213, 163, 0.65);
-  border-radius: 8px;
-  background: rgba(16, 28, 22, 0.55);
-  color: var(--gold-bright);
-  font: inherit;
-  font-size: 0.85em;
-  letter-spacing: 0.2em;
-  text-align: center;
-  outline: none;
-}
-.groom-input::placeholder {
-  color: rgba(243, 236, 221, 0.45);
-  letter-spacing: 0.12em;
-}
-.groom-cancel {
-  border: none;
-  background: transparent;
-  color: rgba(243, 236, 221, 0.7);
-  font-size: 14px;
-  cursor: pointer;
-  padding: 4px;
-  letter-spacing: 0;
-}
-.hold-hint {
-  margin-top: 12px;
-  font-size: 12px;
-  letter-spacing: 0.18em;
-  color: var(--gold-light);
-  animation: holdPulse 1.2s ease-in-out infinite;
-}
-@keyframes holdPulse {
-  0%, 100% { opacity: 0.65; }
-  50% { opacity: 1; }
 }
 .cover-ring {
   position: absolute;
@@ -363,16 +231,18 @@ onUnmounted(() => {
   to { transform: rotate(360deg); }
 }
 .cover-date {
-  font-size: 15px;
-  letter-spacing: 0.32em;
+  font-family: var(--font-hand);
+  font-size: 17px;
+  letter-spacing: 0.18em;
   color: var(--gold-light);
   margin-top: 22px;
 }
 .cover-venue {
+  font-family: var(--font-hand);
   margin-top: 10px;
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(243, 236, 221, 0.85);
-  letter-spacing: 0.24em;
+  letter-spacing: 0.14em;
 }
 .cover-btn {
   margin-top: 36px;
@@ -386,10 +256,10 @@ onUnmounted(() => {
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   color: var(--gold-light);
-  letter-spacing: 0.4em;
-  font-size: 14px;
+  letter-spacing: 0.22em;
+  font-size: 16px;
   cursor: pointer;
-  font-family: inherit;
+  font-family: var(--font-hand);
   transition: all 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
   animation: btnBreathe 2.6s ease-in-out infinite;
 }
@@ -410,8 +280,9 @@ onUnmounted(() => {
   width: 100%;
   text-align: center;
   z-index: 3;
-  font-size: 12px;
-  letter-spacing: 0.3em;
+  font-family: var(--font-hand);
+  font-size: 14px;
+  letter-spacing: 0.16em;
   color: rgba(243, 236, 221, 0.62);
   animation: hintFloat 2.2s ease-in-out infinite;
 }

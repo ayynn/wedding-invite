@@ -1,28 +1,43 @@
 <script setup lang="ts">
-import type { Venue } from '@/types'
+import type { Venue } from '@/types';
 
 defineProps<{
-  logoParts: string[]
-  venue: Venue
-  bgm: { title: string; artist: string }
-}>()
+  logoParts: string[];
+  venue: Venue;
+  bgm: { title: string; artist: string };
+}>();
 </script>
 
 <template>
   <footer class="finale">
     <div class="wrap">
       <div class="fv gold-text">
-        <template v-for="(part, i) in logoParts" :key="i">
-          <span v-if="part === '&'" class="amp">&amp;</span>
+        <template
+          v-for="(part, i) in logoParts"
+          :key="i"
+        >
+          <span
+            v-if="part === '&'"
+            class="amp"
+            >&amp;</span
+          >
           <template v-else>{{ part }}</template>
         </template>
       </div>
       <div class="f-sub">我们 · 结婚啦</div>
       <p class="f-addr">
         {{ venue.name }}<br />
-        {{ venue.address }} · <a :href="venue.mapUrl" target="_blank" rel="noopener">点击查看地图</a>
+        {{ venue.address }} ·
+        <a
+          :href="venue.mapUrl"
+          target="_blank"
+          rel="noopener"
+          >点击查看地图</a
+        >
       </p>
-      <p class="music-note">♪ {{ bgm.title }} · {{ bgm.artist }} ｜ 可点击右下角音符开关</p>
+      <p class="music-note">
+        ♪ {{ bgm.title }} · {{ bgm.artist }} ｜ 可点击右下角音符开关
+      </p>
     </div>
   </footer>
 </template>
@@ -40,10 +55,16 @@ defineProps<{
   color: var(--cream);
   position: relative;
 }
+.finale .wrap {
+  padding: 0 24px;
+}
 .fv {
-  font-family: 'Great Vibes', cursive;
+  font-family: var(--font-script);
   font-size: clamp(58px, 12vw, 100px);
+  line-height: 1.4;
   white-space: nowrap;
+  display: inline-block;
+  padding: 0.15em 0.35em;
   animation: fvGlow 4s ease-in-out infinite;
 }
 .fv .amp {
@@ -52,24 +73,31 @@ defineProps<{
   margin: 0 0.04em;
 }
 @keyframes fvGlow {
-  0%, 100% {
-    text-shadow: 0 6px 40px rgba(0, 0, 0, 0.6), 0 0 0 rgba(232, 213, 163, 0);
+  0%,
+  100% {
+    text-shadow:
+      0 6px 40px rgba(0, 0, 0, 0.6),
+      0 0 0 rgba(232, 213, 163, 0);
   }
   50% {
-    text-shadow: 0 6px 40px rgba(0, 0, 0, 0.6), 0 0 44px rgba(232, 213, 163, 0.55);
+    text-shadow:
+      0 6px 40px rgba(0, 0, 0, 0.6),
+      0 0 44px rgba(232, 213, 163, 0.55);
   }
 }
 .f-sub {
-  font-size: 15px;
-  letter-spacing: 0.5em;
+  font-family: var(--font-hand);
+  font-size: 20px;
+  letter-spacing: 0.28em;
   margin-top: 18px;
   color: rgba(243, 236, 221, 0.85);
 }
 .f-addr {
+  font-family: var(--font-hand);
   margin-top: 34px;
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(243, 236, 221, 0.7);
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
 }
 .f-addr a {
   color: var(--gold-light);
@@ -78,7 +106,7 @@ defineProps<{
 }
 .music-note {
   position: absolute;
-  bottom: 34px;
+  bottom: 50px;
   width: 100%;
   font-size: 12px;
   color: rgba(243, 236, 221, 0.5);

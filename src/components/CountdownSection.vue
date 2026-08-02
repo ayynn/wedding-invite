@@ -58,7 +58,7 @@ const { days, hours, minutes, seconds, expired } = useCountdown(props.target)
   text-align: center;
 }
 .num {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display-en);
   font-size: clamp(40px, 8vw, 64px);
   font-weight: 600;
   color: var(--gold-light);
@@ -67,16 +67,18 @@ const { days, hours, minutes, seconds, expired } = useCountdown(props.target)
   text-shadow: 0 0 34px rgba(232, 213, 163, 0.3);
 }
 .lab {
-  font-size: 12px;
-  letter-spacing: 0.34em;
+  font-family: var(--font-hand);
+  font-size: 15px;
+  letter-spacing: 0.2em;
   color: rgba(243, 236, 221, 0.7);
   margin-top: 6px;
 }
 .cd-note {
+  font-family: var(--font-hand);
   text-align: center;
   margin-top: 30px;
   color: rgba(243, 236, 221, 0.65);
-  font-size: 13px;
-  letter-spacing: 0.28em;
+  font-size: 15px;
+  letter-spacing: 0.14em;
 }
 </style>

@@ -77,16 +77,17 @@ defineProps<{
   }
 }
 .t-time {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display-en);
   color: var(--gold);
   font-size: 26px;
   font-weight: 600;
 }
 .t-title {
-  font-size: 18px;
-  font-weight: 500;
+  font-family: var(--font-hand);
+  font-size: 20px;
+  font-weight: 400;
   margin: 6px 0 4px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
 }
 .t-desc {
   font-size: 13px;

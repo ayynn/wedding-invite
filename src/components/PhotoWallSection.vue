@@ -314,7 +314,7 @@ onUnmounted(() => {
   border: 1px solid rgba(201, 168, 106, 0.45);
   border-radius: 12px;
   background: rgba(250, 246, 238, 0.6);
-  font-family: inherit;
+  font-family: var(--font-serif);
   font-size: 14px;
   color: var(--green-deep);
   transition: 0.3s;
@@ -471,6 +471,13 @@ onUnmounted(() => {
   font-size: 12px;
   opacity: 0.85;
   margin-top: 2px;
+}
+.form-ok-tip,
+.wall-loading,
+.wall-empty {
+  font-family: var(--font-hand);
+  font-size: 16px;
+  letter-spacing: 0.08em;
 }
 .wall-loading,
 .wall-empty,
