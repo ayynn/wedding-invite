@@ -1,5 +1,8 @@
 <script setup lang="ts">
+defineOptions({ name: 'rsvp-section' })
+
 import { reactive, ref } from 'vue'
+import { lookupRsvpByName, submitRsvp, type RsvpRecord } from '@/api/client'
 import type { RsvpPayload } from '@/types'
 import SectionTitle from './SectionTitle.vue'
 
@@ -15,8 +18,42 @@ const form = reactive({
   msg: ''
 })
 const submitted = ref(false)
+const submitting = ref(false)
+const submitError = ref('')
+const duplicateMatches = ref<RsvpRecord[]>([])
+const showDuplicateConfirm = ref(false)
+/** 已确认「不是同一人」的姓名；换名后需重新检查 */
+const confirmedNotSameName = ref('')
 
-const STORAGE_KEY = 'wedding_rsvp'
+function formatTime(time?: string): string {
+  if (!time) return '—'
+  return time.slice(0, 19).replace('T', ' ')
+}
+
+async function doSubmit(): Promise<void> {
+  submitting.value = true
+  submitError.value = ''
+  const payload: RsvpPayload = {
+    name: form.name.trim(),
+    phone: form.phone.trim(),
+    num: form.num.trim(),
+    attend: form.attend,
+    msg: form.msg.trim(),
+    time: new Date().toISOString()
+  }
+  try {
+    await submitRsvp(props.endpoint, payload)
+    submitted.value = true
+    showDuplicateConfirm.value = false
+    duplicateMatches.value = []
+    confirmedNotSameName.value = ''
+  } catch (err) {
+    submitError.value = '提交失败，请稍后重试'
+    console.warn('[RSVP] 上传失败:', err)
+  } finally {
+    submitting.value = false
+  }
+}
 
 async function onSubmit(e: Event): Promise<void> {
   e.preventDefault()
@@ -24,35 +61,42 @@ async function onSubmit(e: Event): Promise<void> {
     ;(document.getElementById('rsvpName') as HTMLInputElement | null)?.focus()
     return
   }
-  const payload: RsvpPayload = {
-    name: form.name.trim(),
-    phone: form.phone.trim(),
-    num: form.num.trim(),
-    attend: form.attend,
-    msg: form.msg.trim(),
-    time: new Date().toLocaleString()
+  if (!props.endpoint) {
+    submitError.value = '登记服务暂不可用'
+    return
   }
-  // 1) 本机兜底存储
+
+  const name = form.name.trim()
+  submitting.value = true
+  submitError.value = ''
   try {
-    const list = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as RsvpPayload[]
-    list.push(payload)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
-  } catch {
-    /* localStorage 不可用时忽略 */
-  }
-  // 2) 若配置了后端接口则异步上传
-  if (props.endpoint) {
-    try {
-      await fetch(props.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-    } catch (err) {
-      console.warn('[RSVP] 上传失败，已保存在本机:', err)
+    if (confirmedNotSameName.value !== name) {
+      const matches = await lookupRsvpByName(props.endpoint, name)
+      if (matches.length) {
+        duplicateMatches.value = matches
+        showDuplicateConfirm.value = true
+        submitting.value = false
+        return
+      }
     }
+    await doSubmit()
+  } catch (err) {
+    submitError.value = '提交失败，请稍后重试'
+    console.warn('[RSVP] 同名检查失败:', err)
+    submitting.value = false
   }
-  submitted.value = true
+}
+
+function cancelDuplicate(): void {
+  showDuplicateConfirm.value = false
+  duplicateMatches.value = []
+  confirmedNotSameName.value = ''
+}
+
+async function confirmNotSameAndSubmit(): Promise<void> {
+  confirmedNotSameName.value = form.name.trim()
+  showDuplicateConfirm.value = false
+  await doSubmit()
 }
 </script>
 
@@ -73,7 +117,10 @@ async function onSubmit(e: Event): Promise<void> {
           <label for="attend-no">✕ 遗憾缺席</label>
         </div>
         <textarea v-model="form.msg" rows="3" placeholder="写下您的祝福…"></textarea>
-        <button class="submit" type="submit">✦ 送出祝福 ✦</button>
+        <p v-if="submitError" class="form-err">{{ submitError }}</p>
+        <button class="submit" type="submit" :disabled="submitting">
+          {{ submitting ? '提交中…' : '✦ 送出祝福 ✦' }}
+        </button>
       </form>
       <div v-else class="form-ok">
         <div class="ok-ic">
@@ -85,7 +132,36 @@ async function onSubmit(e: Event): Promise<void> {
         <h3>已收到您的回复</h3>
         <p>感谢您的祝福，我们婚礼见！</p>
       </div>
-      <p class="rsvp-note reveal d1">* 您的回复仅保存在本机浏览器，不会上传至网络；提交后可在本机再次查看。</p>
+    </div>
+
+    <div v-if="showDuplicateConfirm" class="dup-mask" @click.self="cancelDuplicate">
+      <div class="dup-panel" role="dialog" aria-modal="true" aria-labelledby="dup-title">
+        <h3 id="dup-title">发现同名登记</h3>
+        <p class="dup-lead">
+          已有姓名为「{{ form.name.trim() }}」的登记记录。请确认是否为您本人；若不是同一人，可继续登记。
+        </p>
+        <ul class="dup-list">
+          <li v-for="(item, idx) in duplicateMatches" :key="item.id || idx">
+            <div class="dup-row"><span>姓名</span><b>{{ item.name }}</b></div>
+            <div class="dup-row"><span>电话</span><b>{{ item.phone || '—' }}</b></div>
+            <div class="dup-row"><span>人数</span><b>{{ item.num || '—' }}</b></div>
+            <div class="dup-row">
+              <span>赴约</span>
+              <b>{{ item.attend === 'no' ? '遗憾缺席' : '欣然赴约' }}</b>
+            </div>
+            <div class="dup-row"><span>留言</span><b>{{ item.msg || '—' }}</b></div>
+            <div class="dup-row"><span>时间</span><b>{{ formatTime(item.time) }}</b></div>
+          </li>
+        </ul>
+        <div class="dup-actions">
+          <button type="button" class="ghost" :disabled="submitting" @click="cancelDuplicate">
+            这是我，取消
+          </button>
+          <button type="button" class="primary" :disabled="submitting" @click="confirmNotSameAndSubmit">
+            {{ submitting ? '提交中…' : '不是我，继续登记' }}
+          </button>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -151,6 +227,12 @@ async function onSubmit(e: Event): Promise<void> {
   color: #fff;
   box-shadow: 0 8px 22px rgba(201, 168, 106, 0.4);
 }
+.form-err {
+  color: #b0564a;
+  font-size: 13px;
+  margin: -6px 0 12px;
+  text-align: center;
+}
 .submit {
   width: 100%;
   padding: 16px;
@@ -174,6 +256,11 @@ async function onSubmit(e: Event): Promise<void> {
   transform: scale(0.97);
   box-shadow: 0 6px 16px rgba(45, 74, 54, 0.25);
   transition: 0.1s;
+}
+.submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
 }
 .form-ok {
   text-align: center;
@@ -201,13 +288,93 @@ async function onSubmit(e: Event): Promise<void> {
   font-size: 14px;
   margin-top: 10px;
 }
-.rsvp-note {
-  text-align: center;
+.dup-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(16, 26, 20, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.dup-panel {
+  width: min(440px, 100%);
+  max-height: min(80vh, 640px);
+  overflow: auto;
+  background: #fffaf2;
+  border: 1px solid rgba(201, 168, 106, 0.4);
+  border-radius: 16px;
+  padding: 22px 20px 18px;
+  box-shadow: 0 20px 50px rgba(16, 26, 20, 0.22);
+}
+.dup-panel h3 {
+  font-size: 18px;
+  letter-spacing: 0.14em;
+  color: var(--green-deep);
+  font-weight: 500;
+}
+.dup-lead {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.7;
   color: var(--brown);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  margin-top: 14px;
-  opacity: 0.8;
+}
+.dup-list {
+  list-style: none;
+  margin: 16px 0 0;
+  display: grid;
+  gap: 12px;
+}
+.dup-list li {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(201, 168, 106, 0.28);
+  border-radius: 12px;
+}
+.dup-row {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  padding: 3px 0;
+}
+.dup-row span {
+  width: 40px;
+  flex-shrink: 0;
+  color: var(--brown);
+}
+.dup-row b {
+  font-weight: 500;
+  color: var(--green-deep);
+  word-break: break-all;
+}
+.dup-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.dup-actions button {
+  font: inherit;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(45, 74, 54, 0.28);
+  background: #fff;
+  color: var(--green-deep);
+}
+.dup-actions .primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--ivory);
+}
+.dup-actions .ghost {
+  background: transparent;
+}
+.dup-actions button:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 @keyframes popIn {
   from {

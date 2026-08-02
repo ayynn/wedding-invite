@@ -1,9 +1,9 @@
 <script setup lang="ts">
 defineOptions({ name: 'admin-wall' })
 
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { weddingConfig } from '@/config/wedding'
-import { deleteWall, fetchWall, updateWall, uploadWall } from '@/api/client'
+import { deleteWall, deleteWallBatch, fetchWall, updateWall, uploadWall } from '@/api/client'
 import type { WallItem } from '@/types'
 
 const endpoint = weddingConfig.api.wallEndpoint
@@ -14,8 +14,10 @@ const list = ref<WallItem[]>([])
 const loading = ref(false)
 const error = ref('')
 const saving = ref(false)
+const batching = ref(false)
 const showForm = ref(false)
 const editingId = ref<string | null>(null)
+const selected = ref<Set<string>>(new Set())
 
 const form = reactive({
   name: '',
@@ -25,13 +27,21 @@ const form = reactive({
   height: 853
 })
 
+const selectableIds = computed(() => list.value.map((i) => i.id))
+const allSelected = computed(
+  () => selectableIds.value.length > 0 && selectableIds.value.every((id) => selected.value.has(id))
+)
+const selectedCount = computed(() => selected.value.size)
+
 async function load(): Promise<void> {
   loading.value = true
   error.value = ''
+  selected.value = new Set()
   try {
     list.value = await fetchWall(endpoint)
   } catch (e) {
     error.value = e instanceof Error ? e.message : '加载失败'
+    list.value = []
   } finally {
     loading.value = false
   }
@@ -60,6 +70,17 @@ function openEdit(item: WallItem): void {
   form.width = item.width
   form.height = item.height
   showForm.value = true
+}
+
+function toggleOne(id: string, checked: boolean): void {
+  const next = new Set(selected.value)
+  if (checked) next.add(id)
+  else next.delete(id)
+  selected.value = next
+}
+
+function toggleAll(checked: boolean): void {
+  selected.value = checked ? new Set(selectableIds.value) : new Set()
 }
 
 function compressImage(file: File): Promise<{ dataUrl: string; width: number; height: number }> {
@@ -160,6 +181,22 @@ async function onDelete(item: WallItem): Promise<void> {
   }
 }
 
+async function onBatchDelete(): Promise<void> {
+  const ids = [...selected.value]
+  if (!ids.length) return
+  if (!window.confirm(`确定删除已选的 ${ids.length} 张照片？`)) return
+  batching.value = true
+  error.value = ''
+  try {
+    await deleteWallBatch(endpoint, ids)
+    await load()
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : '批量删除失败'
+  } finally {
+    batching.value = false
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -172,6 +209,14 @@ onMounted(load)
       </div>
       <div class="actions">
         <button type="button" class="ghost" :disabled="loading" @click="load">刷新</button>
+        <button
+          type="button"
+          class="danger"
+          :disabled="!selectedCount || batching || loading"
+          @click="onBatchDelete"
+        >
+          {{ batching ? '删除中…' : `批量删除${selectedCount ? ` (${selectedCount})` : ''}` }}
+        </button>
         <button type="button" class="primary" @click="openCreate">新增照片</button>
       </div>
     </header>
@@ -209,34 +254,59 @@ onMounted(load)
       <table>
         <thead>
           <tr>
+            <th class="check">
+              <input
+                type="checkbox"
+                :checked="allSelected"
+                :disabled="loading || !selectableIds.length"
+                aria-label="全选"
+                @change="toggleAll(($event.target as HTMLInputElement).checked)"
+              />
+            </th>
             <th>预览</th>
             <th>昵称</th>
             <th>文案</th>
+            <th>点赞</th>
             <th>时间</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="loading">
-            <td colspan="5" class="empty">加载中…</td>
-          </tr>
-          <tr v-else-if="!list.length">
-            <td colspan="5" class="empty">暂无照片</td>
-          </tr>
-          <tr v-for="item in list" :key="item.id">
-            <td>
-              <a :href="item.url" target="_blank" rel="noopener">
-                <img class="thumb" :src="item.url" :alt="item.name" />
-              </a>
-            </td>
-            <td>{{ item.name }}</td>
-            <td>{{ item.caption || '—' }}</td>
-            <td class="muted">{{ item.createdAt?.slice(0, 19).replace('T', ' ') || '—' }}</td>
-            <td class="ops">
-              <button type="button" @click="openEdit(item)">编辑</button>
-              <button type="button" class="danger" @click="onDelete(item)">删除</button>
-            </td>
-          </tr>
+          <template v-if="loading">
+            <tr>
+              <td colspan="7" class="empty">加载中…</td>
+            </tr>
+          </template>
+          <template v-else-if="!list.length">
+            <tr>
+              <td colspan="7" class="empty">暂无照片</td>
+            </tr>
+          </template>
+          <template v-else>
+            <tr v-for="item in list" :key="item.id">
+              <td class="check">
+                <input
+                  type="checkbox"
+                  :checked="selected.has(item.id)"
+                  :aria-label="`选择 ${item.name}`"
+                  @change="toggleOne(item.id, ($event.target as HTMLInputElement).checked)"
+                />
+              </td>
+              <td>
+                <a :href="item.url" target="_blank" rel="noopener">
+                  <img class="thumb" :src="item.url" :alt="item.name" />
+                </a>
+              </td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.caption || '—' }}</td>
+              <td>{{ item.likes ?? 0 }}</td>
+              <td class="muted">{{ item.createdAt?.slice(0, 19).replace('T', ' ') || '—' }}</td>
+              <td class="ops">
+                <button type="button" @click="openEdit(item)">编辑</button>
+                <button type="button" class="danger" @click="onDelete(item)">删除</button>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -265,6 +335,7 @@ h1 {
 .actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 button {
   font: inherit;
@@ -285,6 +356,10 @@ button.ghost {
 button.danger {
   color: #a33;
   border-color: rgba(170, 51, 51, 0.35);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .error {
   color: #a33;
@@ -344,7 +419,7 @@ input[type='file'] {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 640px;
+  min-width: 720px;
 }
 th,
 td {
@@ -359,6 +434,20 @@ th {
   font-weight: 500;
   letter-spacing: 0.08em;
   color: var(--green-soft);
+}
+th.check,
+td.check {
+  width: 42px;
+  text-align: center;
+  padding-left: 12px;
+  padding-right: 8px;
+}
+th.check input,
+td.check input {
+  width: auto;
+  padding: 0;
+  accent-color: var(--green);
+  cursor: pointer;
 }
 .thumb {
   width: 72px;

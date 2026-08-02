@@ -68,21 +68,24 @@ function renderCharts(): void {
 
   if (attendChartEl.value) {
     attendChart ??= echarts.init(attendChartEl.value)
-    attendChart.setOption({
-      color: ['#2d4a36', '#c9a86a'],
-      tooltip: { trigger: 'item' },
-      series: [
-        {
-          type: 'pie',
-          radius: ['42%', '68%'],
-          label: { color: '#1c2e24' },
-          data: [
-            { name: '欣然赴约', value: yes },
-            { name: '遗憾缺席', value: no }
-          ]
-        }
-      ]
-    })
+    attendChart.setOption(
+      {
+        color: ['#2d4a36', '#c9a86a'],
+        tooltip: { trigger: 'item' },
+        series: [
+          {
+            type: 'pie',
+            radius: ['42%', '68%'],
+            label: { color: '#1c2e24' },
+            data: [
+              { name: '欣然赴约', value: yes },
+              { name: '遗憾缺席', value: no }
+            ]
+          }
+        ]
+      },
+      { notMerge: true }
+    )
   }
 
   const trendMap = new Map<string, number>()
@@ -99,28 +102,31 @@ function renderCharts(): void {
 
   if (trendChartEl.value) {
     trendChart ??= echarts.init(trendChartEl.value)
-    trendChart.setOption({
-      color: ['#2d4a36', '#c9a86a'],
-      tooltip: { trigger: 'axis' },
-      legend: { data: ['登记人数', '照片上传'] },
-      grid: { left: 40, right: 20, top: 40, bottom: 30 },
-      xAxis: { type: 'category', data: days.length ? days : ['暂无'] },
-      yAxis: { type: 'value', minInterval: 1 },
-      series: [
-        {
-          name: '登记人数',
-          type: 'line',
-          smooth: true,
-          data: days.length ? days.map((d) => trendMap.get(d) || 0) : [0]
-        },
-        {
-          name: '照片上传',
-          type: 'bar',
-          barMaxWidth: 28,
-          data: days.length ? days.map((d) => wallMap.get(d) || 0) : [0]
-        }
-      ]
-    })
+    trendChart.setOption(
+      {
+        color: ['#2d4a36', '#c9a86a'],
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['登记人数', '照片上传'] },
+        grid: { left: 40, right: 20, top: 40, bottom: 30 },
+        xAxis: { type: 'category', data: days.length ? days : ['暂无'] },
+        yAxis: { type: 'value', minInterval: 1 },
+        series: [
+          {
+            name: '登记人数',
+            type: 'line',
+            smooth: true,
+            data: days.length ? days.map((d) => trendMap.get(d) || 0) : [0]
+          },
+          {
+            name: '照片上传',
+            type: 'bar',
+            barMaxWidth: 28,
+            data: days.length ? days.map((d) => wallMap.get(d) || 0) : [0]
+          }
+        ]
+      },
+      { notMerge: true }
+    )
   }
 
   const buckets = [
@@ -138,14 +144,17 @@ function renderCharts(): void {
 
   if (partyChartEl.value) {
     partyChart ??= echarts.init(partyChartEl.value)
-    partyChart.setOption({
-      color: ['#4a6b52'],
-      tooltip: { trigger: 'axis' },
-      grid: { left: 40, right: 16, top: 24, bottom: 30 },
-      xAxis: { type: 'category', data: buckets.map((b) => b.name) },
-      yAxis: { type: 'value', minInterval: 1 },
-      series: [{ type: 'bar', barMaxWidth: 36, data: partyData }]
-    })
+    partyChart.setOption(
+      {
+        color: ['#4a6b52'],
+        tooltip: { trigger: 'axis' },
+        grid: { left: 40, right: 16, top: 24, bottom: 30 },
+        xAxis: { type: 'category', data: buckets.map((b) => b.name) },
+        yAxis: { type: 'value', minInterval: 1 },
+        series: [{ type: 'bar', barMaxWidth: 36, data: partyData }]
+      },
+      { notMerge: true }
+    )
   }
 }
 

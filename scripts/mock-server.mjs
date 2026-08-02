@@ -82,6 +82,7 @@ function seedDemo() {
         caption: ['仪式瞬间', '合影', '花房', '泳池'][i],
         width: 8,
         height: 8,
+        likes: [3, 1, 5, 0][i],
         mime: 'image/jpeg',
         createdAt
       })
@@ -135,9 +136,11 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/api/rsvp' && req.method === 'GET') {
+    const nameFilter = (url.searchParams.get('name') || '').trim()
     const items = [...kv.entries()]
       .filter(([k]) => k.startsWith('rsvp:'))
       .map(([, v]) => JSON.parse(v))
+      .filter((r) => !nameFilter || (r.name || '').trim() === nameFilter)
       .sort((a, b) => String(b.time || '').localeCompare(String(a.time || '')))
     return json(res, items)
   }
@@ -159,6 +162,20 @@ const server = http.createServer(async (req, res) => {
   }
 
   /* ---------- API: 图片墙 ---------- */
+  const wallLike = pathname.match(/^\/api\/wall\/([^/]+)\/like$/)
+  if (wallLike) {
+    const id = decodeURIComponent(wallLike[1])
+    const key = `wall:${id}`
+    if (req.method === 'POST') {
+      const prev = kv.has(key) ? JSON.parse(kv.get(key)) : null
+      if (!prev) return json(res, { ok: false, error: '记录不存在' }, 404)
+      const likes = Math.max(0, Number(prev.likes) || 0) + 1
+      kv.set(key, JSON.stringify({ ...prev, likes }))
+      return json(res, { ok: true, id, likes })
+    }
+    return json(res, { ok: false, error: 'Method Not Allowed' }, 405)
+  }
+
   const wallItem = pathname.match(/^\/api\/wall\/([^/]+)$/)
   if (wallItem) {
     const id = decodeURIComponent(wallItem[1])
@@ -205,6 +222,7 @@ const server = http.createServer(async (req, res) => {
           url: `/wall/${m.id}`,
           width: m.width,
           height: m.height,
+          likes: Math.max(0, Number(m.likes) || 0),
           createdAt: m.createdAt
         }
       })
@@ -225,6 +243,7 @@ const server = http.createServer(async (req, res) => {
       caption: (body.caption ?? '').trim().slice(0, 60),
       width: body.width || 1280,
       height: body.height || 853,
+      likes: 0,
       mime,
       createdAt: new Date().toISOString()
     }
