@@ -13,7 +13,7 @@ const { showWeChatTip, showFallback, copyOk, share, copyLink, closeAll } = useSh
 </script>
 
 <template>
-  <div class="share-invite">
+  <div class="share-invite no-export">
     <button type="button" class="share-btn" @click="share">
       <span class="share-ic" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">

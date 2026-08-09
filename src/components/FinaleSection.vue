@@ -1,26 +1,29 @@
 <script setup lang="ts">
-import type { Venue } from '@/types';
+defineOptions({ name: 'finale-section' })
+
+import type { Venue } from '@/types'
+import ExportLongImageButton from './ExportLongImageButton.vue'
 
 defineProps<{
-  logoParts: string[];
-  venue: Venue;
-  bgm: { title: string; artist: string };
-}>();
+  logoParts: string[]
+  venue: Venue
+  bgm: { title: string; artist: string }
+  exporting?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'export'): void
+}>()
 </script>
 
 <template>
   <footer class="finale">
+    <img class="finale-bg" src="/imgs/venue_33.jpg" alt="" draggable="false" />
+    <div class="finale-shade" aria-hidden="true"></div>
     <div class="wrap">
       <div class="fv gold-text">
-        <template
-          v-for="(part, i) in logoParts"
-          :key="i"
-        >
-          <span
-            v-if="part === '&'"
-            class="amp"
-            >&amp;</span
-          >
+        <template v-for="(part, i) in logoParts" :key="i">
+          <span v-if="part === '&'" class="amp">&amp;</span>
           <template v-else>{{ part }}</template>
         </template>
       </div>
@@ -28,14 +31,12 @@ defineProps<{
       <p class="f-addr">
         {{ venue.name }}<br />
         {{ venue.address }} ·
-        <a
-          :href="venue.mapUrl"
-          target="_blank"
-          rel="noopener"
-          >点击查看地图</a
-        >
+        <a :href="venue.mapUrl" target="_blank" rel="noopener">点击查看地图</a>
       </p>
-      <p class="music-note">
+      <div class="finale-actions no-export">
+        <ExportLongImageButton variant="dark" :exporting="!!exporting" @export="emit('export')" />
+      </div>
+      <p class="music-note no-export">
         ♪ {{ bgm.title }} · {{ bgm.artist }} ｜ 可点击右下角音符开关
       </p>
     </div>
@@ -49,14 +50,32 @@ defineProps<{
   align-items: center;
   justify-content: center;
   text-align: center;
-  background:
-    linear-gradient(180deg, rgba(16, 28, 22, 0.52), rgba(16, 28, 22, 0.72)),
-    url('/imgs/venue_33.jpg') center / cover no-repeat fixed;
+  background: #1c2e24;
   color: var(--cream);
   position: relative;
+  overflow: hidden;
+}
+.finale-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+.finale-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(16, 28, 22, 0.52), rgba(16, 28, 22, 0.72));
 }
 .finale .wrap {
-  padding: 0 24px;
+  position: relative;
+  z-index: 2;
+  padding: 0 24px 72px;
 }
 .fv {
   font-family: var(--font-script);
@@ -104,9 +123,15 @@ defineProps<{
   text-decoration: none;
   border-bottom: 1px dotted var(--gold);
 }
+.finale-actions {
+  max-width: 320px;
+  margin: 28px auto 0;
+}
 .music-note {
   position: absolute;
   bottom: 50px;
+  left: 0;
+  z-index: 2;
   width: 100%;
   font-size: 12px;
   color: rgba(243, 236, 221, 0.5);

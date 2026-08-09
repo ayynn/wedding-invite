@@ -69,6 +69,8 @@ onUnmounted(() => {
 
 <template>
   <header class="cover" :class="{ leaving: opened }" @click="emit('open')">
+    <img class="cover-bg" src="/imgs/venue_01.jpg" alt="" draggable="false" />
+    <div class="cover-shade" aria-hidden="true"></div>
     <div
       class="cover-top"
       @click="onTitleTap"
@@ -93,9 +95,9 @@ onUnmounted(() => {
       </div>
       <div class="cover-date">{{ config.dateText }}</div>
       <div class="cover-venue">{{ config.venue.name }}</div>
-      <button class="cover-btn" @click.stop="emit('open')">✦ 打开这份邀请 ✦</button>
+      <button class="cover-btn no-export" @click.stop="emit('open')">✦ 打开这份邀请 ✦</button>
     </div>
-    <div class="cover-hint">上滑进入我们的故事<span class="arr">⌃</span></div>
+    <div class="cover-hint no-export">上滑进入我们的故事<span class="arr">⌃</span></div>
   </header>
 </template>
 
@@ -108,18 +110,40 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  background:
-    linear-gradient(180deg, rgba(16, 28, 22, 0.42) 0%, rgba(16, 28, 22, 0.16) 55%, rgba(28, 46, 36, 0.58) 100%),
-    url('/imgs/venue_01.jpg') center / cover no-repeat;
+  background: #1c2e24;
   color: var(--cream);
   overflow: hidden;
   cursor: pointer;
   transition: transform 1.05s cubic-bezier(0.72, 0.01, 0.24, 1), opacity 0.9s ease;
 }
+.cover-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+.cover-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 28, 22, 0.42) 0%,
+    rgba(16, 28, 22, 0.16) 55%,
+    rgba(28, 46, 36, 0.58) 100%
+  );
+}
 .cover::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 2;
+  pointer-events: none;
   background: radial-gradient(ellipse at 50% 58%, transparent 26%, rgba(16, 26, 20, 0.5) 100%);
 }
 .cover.leaving {

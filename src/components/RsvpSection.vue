@@ -1,11 +1,23 @@
 <script setup lang="ts">
 defineOptions({ name: 'rsvp-section' })
 
-import { reactive, ref } from 'vue'
+import { computed, inject, reactive, ref, type Ref } from 'vue'
 import { lookupRsvpByName, submitRsvp, type RsvpRecord } from '@/api/client'
 import type { RsvpPayload } from '@/types'
 import SectionTitle from './SectionTitle.vue'
 import ShareInviteButton from './ShareInviteButton.vue'
+import ExportLongImageButton from './ExportLongImageButton.vue'
+
+const exportInvite = inject<{
+  exporting: Ref<boolean>
+  exportImage: () => Promise<void>
+}>('exportInviteImage')
+
+const exportBusy = computed(() => !!exportInvite?.exporting.value)
+
+function onExportLongImage(): void {
+  void exportInvite?.exportImage()
+}
 
 const props = defineProps<{
   endpoint: string
@@ -123,6 +135,11 @@ async function confirmNotSameAndSubmit(): Promise<void> {
           {{ submitting ? '提交中…' : '✦ 送出祝福 ✦' }}
         </button>
         <ShareInviteButton />
+        <ExportLongImageButton
+          class="export-under-share"
+          :exporting="exportBusy"
+          @export="onExportLongImage"
+        />
       </form>
       <div v-else class="form-ok">
         <div class="ok-ic">
@@ -135,6 +152,11 @@ async function confirmNotSameAndSubmit(): Promise<void> {
         <p>感谢您的祝福，我们婚礼见！</p>
         <div class="ok-share">
           <ShareInviteButton />
+          <ExportLongImageButton
+            class="export-under-share"
+            :exporting="exportBusy"
+            @export="onExportLongImage"
+          />
         </div>
       </div>
     </div>
@@ -300,6 +322,9 @@ async function confirmNotSameAndSubmit(): Promise<void> {
 .ok-share {
   max-width: 320px;
   margin: 28px auto 0;
+}
+.export-under-share {
+  margin-top: 12px;
 }
 .dup-mask {
   position: fixed;
