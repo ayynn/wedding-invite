@@ -10,7 +10,6 @@ import Cover from '@/components/Cover.vue'
 import CoupleSection from '@/components/CoupleSection.vue'
 import CountdownSection from '@/components/CountdownSection.vue'
 import GallerySection from '@/components/GallerySection.vue'
-import PhotoWallSection from '@/components/PhotoWallSection.vue'
 import ScheduleSection from '@/components/ScheduleSection.vue'
 import TipsSection from '@/components/TipsSection.vue'
 import RsvpSection from '@/components/RsvpSection.vue'
@@ -74,14 +73,6 @@ function handleOpen(): void {
     />
     <CountdownSection :date-text="config.dateText" :date-sub-text="config.dateSubText" :target="config.weddingDate" />
     <GallerySection :items="config.gallery" />
-    <PhotoWallSection
-      :endpoint="config.api.wallEndpoint"
-      :max-size="config.wall.maxSize"
-      :max-bytes="config.wall.maxBytes"
-      :title="config.wall.title"
-      :en="config.wall.en"
-      :sub="config.wall.sub"
-    />
     <ScheduleSection :items="config.schedule" />
     <TipsSection :items="config.tips" :venue="config.venue" />
     <RsvpSection :endpoint="config.api.rsvpEndpoint" />

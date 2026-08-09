@@ -107,7 +107,7 @@ export const weddingConfig: WeddingConfig = {
     {
       icon: 'camera',
       title: '留影分享',
-      desc: '欢迎把您镜头里的美好瞬间发给我们，也可现场扫二维码上传至共享相册。',
+      desc: '婚礼当天请打开现场互动页，把镜头里的美好瞬间上传到照片墙，与大家一起分享。',
     },
     {
       icon: 'love',
@@ -138,11 +138,11 @@ export const weddingConfig: WeddingConfig = {
     wallEndpoint: '/api/wall',
   },
 
-  /** 图片墙 */
+  /** 图片墙（婚礼现场互动页 /live/wall） */
   wall: {
     title: '爱的瞬间',
     en: 'Photo Wall',
-    sub: '把你们镜头里的美好，留在这面墙上',
+    sub: '婚礼现场 · 把你们镜头里的美好，留在这面墙上',
     maxSize: 1280,
     /** 与云函数 MAX_IMG_BYTES 对齐；base64 膨胀后仍需落在 SCF 非文本 6MB 内 */
     maxBytes: 3 * 1024 * 1024,
