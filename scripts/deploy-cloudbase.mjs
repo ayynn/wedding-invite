@@ -168,6 +168,31 @@ for (const name of ['rsvp', 'wall']) {
 
 run('tcb', ['hosting', 'deploy', 'dist', '-e', envId])
 
+/**
+ * CloudBase 静态托管未配置错误文档时，SPA 深链会 404。
+ * 为已知前端路由补传 index.html，保证刷新/直达可用。
+ */
+const spaFallbackRoutes = [
+  'live/index.html',
+  'live/wall/index.html',
+  'live/guide/index.html',
+  'live/portraits/index.html',
+  'live/lottery/index.html',
+  'live/games/index.html',
+  'live/moments/index.html',
+  'admin/index.html',
+  'admin/login/index.html',
+  'admin/wall/index.html',
+  'admin/rsvp/index.html'
+]
+const indexHtml = resolve(root, 'dist/index.html')
+for (const cloudPath of spaFallbackRoutes) {
+  const r = tryRun('tcb', ['hosting', 'deploy', indexHtml, cloudPath, '-e', envId])
+  if (r.status !== 0) {
+    console.warn(`[deploy:cloudbase] SPA 回退上传失败: ${cloudPath}`)
+  }
+}
+
 const detail = spawnSync('tcb', ['hosting', 'detail', '-e', envId], {
   cwd: root,
   encoding: 'utf8',
