@@ -4,10 +4,13 @@ defineOptions({ name: 'live-layout' })
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { weddingConfig } from '@/config/wedding'
+import { useReveal } from '@/composables/useReveal'
 
 const route = useRoute()
 const router = useRouter()
 const config = weddingConfig
+
+useReveal()
 
 const showBack = computed(() => route.name !== 'live-home')
 
