@@ -8,6 +8,7 @@ defineProps<{
   logoParts: string[]
   venue: Venue
   bgm: { title: string; artist: string }
+  photo: string
   exporting?: boolean
 }>()
 
@@ -18,7 +19,7 @@ const emit = defineEmits<{
 
 <template>
   <footer class="finale">
-    <img class="finale-bg" src="/imgs/venue_33.jpg" alt="" draggable="false" />
+    <img class="finale-bg" :src="photo" alt="" draggable="false" />
     <div class="finale-shade" aria-hidden="true"></div>
     <div class="wrap">
       <div class="fv gold-text">
@@ -50,7 +51,7 @@ const emit = defineEmits<{
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: #1c2e24;
+  background: #1b2430;
   color: var(--cream);
   position: relative;
   overflow: hidden;
@@ -62,15 +63,20 @@ const emit = defineEmits<{
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 30%;
   pointer-events: none;
   user-select: none;
+  filter: saturate(0.8) contrast(1.02) blur(1.5px);
+  transform: scale(1.04);
 }
 .finale-shade {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(16, 28, 22, 0.52), rgba(16, 28, 22, 0.72));
+  background:
+    linear-gradient(180deg, rgba(21, 28, 38, 0.86), rgba(27, 36, 48, 0.72)),
+    radial-gradient(90% 60% at 50% 42%, rgba(65, 83, 110, 0.32), transparent 70%);
 }
 .finale .wrap {
   position: relative;

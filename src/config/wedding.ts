@@ -41,6 +41,34 @@ export const weddingConfig: WeddingConfig = {
     '诚邀您见证我们的誓言，共享这一场森林中的浪漫。',
   ],
 
+  /**
+   * 婚纱照素材（public/imgs/portrait/ 下）
+   * 建议尺寸：人像 4:5 约 1000×1250，封面/合照长边 1600–2000，单张 300KB–1MB
+   */
+  portraits: {
+    cover: '/imgs/portrait/cover.jpg',
+    groom: '/imgs/portrait/groom.jpg',
+    bride: '/imgs/portrait/bride.jpg',
+    formal: '/imgs/portrait/couple-formal.jpg',
+    art: '/imgs/portrait/couple-art.jpg',
+    finale: '/imgs/portrait/couple-art.jpg',
+  },
+
+  portraitStories: {
+    formal: {
+      en: 'Us, Together',
+      cn: '并肩而立',
+      sub: '一袭白纱，一身素礼，从此并肩',
+      caption: '白色影棚 · 正式合影',
+    },
+    art: {
+      en: 'Quiet Moments',
+      cn: '静好时光',
+      sub: '镜头之外，是我们最自在的模样',
+      caption: '胶片记忆 · 一台旧相机与两个人',
+    },
+  },
+
   gallery: [
     {
       src: '/imgs/venue_01.jpg',

@@ -9,7 +9,8 @@ interface ParticleOptions {
   petalColors?: string[]
 }
 
-const DEFAULT_PETAL_COLORS = ['#f8d8c4', '#f0c9a8', '#e8c9a0', '#f6d8bc', '#ecd1b4', '#f2cba8']
+/** 取自婚纱照：香槟、象牙、暖灰与影棚蓝的浅调 */
+const DEFAULT_PETAL_COLORS = ['#f2e7d6', '#ddcdb4', '#d9c4b3', '#cfc7ba', '#c3cad6', '#e8ded0']
 
 /**
  * 飘落花瓣 + 漂浮萤火虫粒子层

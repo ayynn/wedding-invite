@@ -1,16 +1,25 @@
 /* ============ 全局主题与基础 ============ */
 
+/**
+ * 主题取色自婚纱照：影棚墨蓝背景、象牙白礼服、建筑暖灰石材、黑色礼服。
+ * 变量名沿用旧命名，仅替换色值，保证所有既有组件同步换肤。
+ */
 :root {
-  --green-deep: #1c2e24;
-  --green: #2d4a36;
-  --green-soft: #4a6b52;
-  --gold: #c9a86a;
-  --gold-light: #e8d5a3;
-  --gold-bright: #f7e7c3;
-  --cream: #faf6ee;
-  --ivory: #f3ecdd;
-  --brown: #8a7350;
-  --shadow: 0 16px 48px rgba(20, 40, 30, 0.18);
+  --green-deep: #1b2430;
+  --green: #2f4257;
+  --green-soft: #55677f;
+  --gold: #bda78a;
+  --gold-light: #ddcdb4;
+  --gold-bright: #f2e7d6;
+  --cream: #f8f5f0;
+  --ivory: #efe9df;
+  --brown: #8a8073;
+  /* 影棚背景蓝 / 暖灰石材 / 肤色暖调，用于新版人像区块 */
+  --ink-blue: #41536e;
+  --ink-blue-deep: #2b3a4f;
+  --stone: #cfc7ba;
+  --blush: #d9c4b3;
+  --shadow: 0 16px 48px rgba(27, 36, 48, 0.16);
   --radius: 18px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   /* 正文宋体；手写展示马善政；新人姓名楷书（文楷含「旻」） */
@@ -74,14 +83,24 @@ img {
   user-select: none;
 }
 
-/* ============ 金色花体 Logo ============ */
+/* ============ 香槟花体 Logo ============ */
 .gold-text {
-  background: linear-gradient(135deg, #fdf3d3 0%, #e8c98a 28%, #c9a86a 52%, #f0d9a8 74%, #b8904f 100%);
+  background: linear-gradient(135deg, #fbf3e6 0%, #e3d2b4 28%, #bda78a 52%, #eaddc4 74%, #a58e6d 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 3px 16px rgba(201, 168, 106, 0.4));
+  filter: drop-shadow(0 3px 16px rgba(189, 167, 138, 0.38));
+}
+
+/* ============ 柔化图片边缘（羽化 + 光晕） ============ */
+.soft-edge {
+  -webkit-mask-image: radial-gradient(118% 104% at 50% 50%, #000 58%, rgba(0, 0, 0, 0.55) 82%, transparent 97%);
+  mask-image: radial-gradient(118% 104% at 50% 50%, #000 58%, rgba(0, 0, 0, 0.55) 82%, transparent 97%);
+}
+.soft-edge-y {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 16%, #000 84%, transparent 100%);
 }
 
 /* ============ 章节基础 ============ */
@@ -182,7 +201,7 @@ img {
   animation-name: petalFall;
   animation-timing-function: ease-in;
   animation-iteration-count: infinite;
-  box-shadow: 0 0 6px rgba(201, 168, 106, 0.25);
+  box-shadow: 0 0 6px rgba(189, 167, 138, 0.25);
 }
 @keyframes petalFall {
   0% {
@@ -198,7 +217,7 @@ img {
 .firefly {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff8d6 0%, #e8d5a3 40%, transparent 72%);
+  background: radial-gradient(circle, #fdf6e8 0%, #ddcdb4 40%, transparent 72%);
   animation: fly 7s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
@@ -216,7 +235,7 @@ img {
   border-radius: 50%;
   pointer-events: none;
   z-index: 78;
-  background: radial-gradient(circle, rgba(201, 168, 106, 0.16) 0%, rgba(201, 168, 106, 0.05) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(189, 167, 138, 0.16) 0%, rgba(65, 83, 110, 0.05) 40%, transparent 70%);
   transform: translate(-50%, -50%);
   transition: opacity 0.4s;
   opacity: 0;

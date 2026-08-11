@@ -34,6 +34,30 @@ export interface GalleryItem {
   span: 'g-1' | 'g-2'
 }
 
+/** 婚纱照素材（人像 / 合照 / 封面） */
+export interface PortraitAssets {
+  /** 封面大图（建筑外景合照） */
+  cover: string
+  /** 新郎单人像（影棚蓝底） */
+  groom: string
+  /** 新娘单人像（影棚蓝底） */
+  bride: string
+  /** 端正合照（白底全身） */
+  formal: string
+  /** 艺术合照（白底情绪） */
+  art: string
+  /** 尾页大图 */
+  finale: string
+}
+
+/** 合照展示区块文案 */
+export interface PortraitStory {
+  en: string
+  cn: string
+  sub: string
+  caption: string
+}
+
 /** 婚礼行程项 */
 export interface ScheduleItem {
   time: string
@@ -111,6 +135,13 @@ export interface WeddingConfig {
   dateSubText: string
   venue: Venue
   loveStory: string[]
+  /** 婚纱照素材路径 */
+  portraits: PortraitAssets
+  /** 端正合照 / 艺术合照文案 */
+  portraitStories: {
+    formal: PortraitStory
+    art: PortraitStory
+  }
   gallery: GalleryItem[]
   schedule: ScheduleItem[]
   tips: TipItem[]

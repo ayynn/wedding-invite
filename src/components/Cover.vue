@@ -69,7 +69,7 @@ onUnmounted(() => {
 
 <template>
   <header class="cover" :class="{ leaving: opened }" @click="emit('open')">
-    <img class="cover-bg" src="/imgs/venue_01.jpg" alt="" draggable="false" />
+    <img class="cover-bg" :src="config.portraits.cover" alt="" draggable="false" />
     <div class="cover-shade" aria-hidden="true"></div>
     <div
       class="cover-top"
@@ -110,7 +110,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  background: #1c2e24;
+  background: #1b2430;
   color: var(--cream);
   overflow: hidden;
   cursor: pointer;
@@ -123,20 +123,24 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 34%;
   pointer-events: none;
   user-select: none;
+  filter: saturate(0.86) contrast(1.03) brightness(0.98);
 }
 .cover-shade {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(16, 28, 22, 0.42) 0%,
-    rgba(16, 28, 22, 0.16) 55%,
-    rgba(28, 46, 36, 0.58) 100%
-  );
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 27, 37, 0.5) 0%,
+      rgba(24, 32, 43, 0.2) 42%,
+      rgba(20, 27, 37, 0.72) 100%
+    ),
+    linear-gradient(90deg, rgba(43, 58, 79, 0.28), transparent 42%, rgba(43, 58, 79, 0.28));
 }
 .cover::after {
   content: '';
@@ -144,7 +148,7 @@ onUnmounted(() => {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 58%, transparent 26%, rgba(16, 26, 20, 0.5) 100%);
+  background: radial-gradient(ellipse at 50% 56%, transparent 24%, rgba(18, 24, 33, 0.58) 100%);
 }
 .cover.leaving {
   transform: translateY(-101%);

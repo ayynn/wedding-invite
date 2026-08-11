@@ -12,6 +12,7 @@ import CoupleSection from '@/components/CoupleSection.vue'
 import CountdownSection from '@/components/CountdownSection.vue'
 import GallerySection from '@/components/GallerySection.vue'
 import ScheduleSection from '@/components/ScheduleSection.vue'
+import PortraitStorySection from '@/components/PortraitStorySection.vue'
 import TipsSection from '@/components/TipsSection.vue'
 import RsvpSection from '@/components/RsvpSection.vue'
 import FinaleSection from '@/components/FinaleSection.vue'
@@ -91,16 +92,31 @@ onUnmounted(() => glowCleanup?.())
         :groom="config.couple.groom"
         :bride="config.couple.bride"
         :love-story="config.loveStory"
+        :groom-photo="config.portraits.groom"
+        :bride-photo="config.portraits.bride"
+      />
+      <PortraitStorySection
+        :src="config.portraits.formal"
+        v-bind="config.portraitStories.formal"
+        variant="formal"
+        tone="light"
       />
       <CountdownSection :date-text="config.dateText" :date-sub-text="config.dateSubText" :target="config.weddingDate" />
       <GallerySection :items="config.gallery" />
       <ScheduleSection :items="config.schedule" />
+      <PortraitStorySection
+        :src="config.portraits.art"
+        v-bind="config.portraitStories.art"
+        variant="art"
+        tone="ink"
+      />
       <TipsSection :items="config.tips" :venue="config.venue" />
       <RsvpSection class="no-export" :endpoint="config.api.rsvpEndpoint" />
       <FinaleSection
         :logo-parts="config.couple.logoParts"
         :venue="config.venue"
         :bgm="{ title: config.bgm.title, artist: config.bgm.artist }"
+        :photo="config.portraits.finale"
         :exporting="exporting"
         @export="exportImage"
       />
