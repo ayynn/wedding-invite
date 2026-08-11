@@ -151,8 +151,10 @@ withDefaults(
   filter: blur(42px) saturate(1.3);
   opacity: 0.55;
 }
+/* 浅色礼服在墨蓝底上会过曝，光晕压弱只保留氛围 */
 .story.ink .frame .glow {
-  opacity: 0.7;
+  opacity: 0.4;
+  filter: blur(56px) saturate(1.1);
 }
 
 figcaption {
