@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineOptions({ name: 'export-long-image-button' })
 
-const props = defineProps<{
+defineProps<{
   exporting: boolean
   variant?: 'light' | 'dark'
 }>()
