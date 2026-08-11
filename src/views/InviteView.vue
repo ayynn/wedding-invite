@@ -117,8 +117,6 @@ onUnmounted(() => glowCleanup?.())
         :venue="config.venue"
         :bgm="{ title: config.bgm.title, artist: config.bgm.artist }"
         :photo="config.portraits.finale"
-        :exporting="exporting"
-        @export="exportImage"
       />
     </main>
   </div>

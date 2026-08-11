@@ -2,18 +2,12 @@
 defineOptions({ name: 'finale-section' })
 
 import type { Venue } from '@/types'
-import ExportLongImageButton from './ExportLongImageButton.vue'
 
 defineProps<{
   logoParts: string[]
   venue: Venue
   bgm: { title: string; artist: string }
   photo: string
-  exporting?: boolean
-}>()
-
-const emit = defineEmits<{
-  (e: 'export'): void
 }>()
 </script>
 
@@ -34,9 +28,6 @@ const emit = defineEmits<{
         {{ venue.address }} ·
         <a :href="venue.mapUrl" target="_blank" rel="noopener">点击查看地图</a>
       </p>
-      <div class="finale-actions no-export">
-        <ExportLongImageButton variant="dark" :exporting="!!exporting" @export="emit('export')" />
-      </div>
       <p class="music-note no-export">
         ♪ {{ bgm.title }} · {{ bgm.artist }} ｜ 可点击右下角音符开关
       </p>
@@ -128,10 +119,6 @@ const emit = defineEmits<{
   color: var(--gold-light);
   text-decoration: none;
   border-bottom: 1px dotted var(--gold);
-}
-.finale-actions {
-  max-width: 320px;
-  margin: 28px auto 0;
 }
 .music-note {
   position: absolute;
