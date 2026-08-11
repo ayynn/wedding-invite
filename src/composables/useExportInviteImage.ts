@@ -1,5 +1,6 @@
 import { nextTick, ref, type Ref } from 'vue'
 import { domToJpeg } from 'modern-screenshot'
+import { buildEmbeddedFontCss, ensureInviteFontsReady } from '@/utils/embedFonts'
 
 export interface ExportInviteImageOptions {
   /** 截图根节点（封面 + 正文） */
@@ -9,14 +10,6 @@ export interface ExportInviteImageOptions {
   openInvite: () => void
   /** 文件名 */
   fileName?: string
-}
-
-async function waitFonts(): Promise<void> {
-  try {
-    await document.fonts.ready
-  } catch {
-    /* ignore */
-  }
 }
 
 async function waitImages(root: HTMLElement): Promise<void> {
@@ -181,18 +174,25 @@ export function useExportInviteImage(options: ExportInviteImageOptions) {
       forceRevealVisible(root)
       restoreStyles = prepareExportStyles(root, options.opened.value)
       window.scrollTo(0, 0)
-      await waitFonts()
+      await ensureInviteFontsReady()
       await waitImages(root)
       // 给布局/图片一帧稳定时间（已关闭 transition）
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
       await new Promise((r) => window.setTimeout(r, 120))
+
+      // 跨域 Google / jsDelivr 字体无法从 styleSheets 读取，需自行嵌入
+      const fontCssText = await buildEmbeddedFontCss(root)
 
       const width = Math.min(root.scrollWidth || root.offsetWidth || 390, 640)
       const dataUrl = await domToJpeg(root, {
         width,
         scale: 2,
         quality: 0.88,
-        backgroundColor: '#faf6ee',
+        backgroundColor: '#f8f5f0',
+        // 不设 preferredFormat：data URL / truetype 子集都需保留，否则 src 会被滤空
+        font: {
+          cssText: fontCssText
+        },
         filter(el) {
           if (!(el instanceof Element)) return true
           if (el instanceof HTMLElement && el.classList.contains('no-export')) return false
