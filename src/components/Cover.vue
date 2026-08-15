@@ -170,18 +170,18 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 58%;
+  object-position: 50% 50%;
   pointer-events: none;
   user-select: none;
-  filter: saturate(0.9) contrast(1.02) brightness(1.02);
-  animation: bgDrift 18s ease-in-out infinite alternate;
+  filter: saturate(0.92) contrast(1.02) brightness(1.02);
+  animation: bgDrift 22s ease-in-out infinite alternate;
 }
 @keyframes bgDrift {
   from {
-    transform: scale(1.04) translate3d(0, 0, 0);
+    transform: scale(1.01) translate3d(0, 0, 0);
   }
   to {
-    transform: scale(1.08) translate3d(0, -1.2%, 0);
+    transform: scale(1.03) translate3d(0, -0.6%, 0);
   }
 }
 .cover-shade {
@@ -240,25 +240,28 @@ onUnmounted(() => {
   display: inline-block;
 }
 .cover-kicker {
-  margin-top: 10px;
+  margin-top: 12px;
   font-family: var(--font-display-en);
   font-size: clamp(12px, 3.2vw, 14px);
-  letter-spacing: 0.42em;
-  text-indent: 0.42em;
+  font-weight: 500;
+  letter-spacing: 0.46em;
+  text-indent: 0.46em;
   text-transform: uppercase;
-  color: rgba(74, 67, 60, 0.78);
+  color: rgba(74, 67, 60, 0.8);
 }
 
 .cover-script {
-  margin-top: 18px;
+  margin-top: 16px;
   font-family: var(--font-script);
-  font-size: clamp(64px, 16vw, 108px);
+  font-size: clamp(60px, 15vw, 100px);
   font-weight: 400;
-  line-height: 1.05;
+  line-height: 1.02;
   letter-spacing: 0.01em;
   color: #3f3832;
   white-space: nowrap;
-  text-shadow: 0 10px 40px rgba(255, 252, 247, 0.55);
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4),
+    0 12px 44px rgba(255, 252, 247, 0.6);
   animation: scriptIn 1.35s cubic-bezier(0.2, 0.7, 0.2, 1) 0.12s both;
 }
 @keyframes scriptIn {

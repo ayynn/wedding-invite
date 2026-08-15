@@ -47,6 +47,7 @@ export const weddingConfig: WeddingConfig = {
    */
   portraits: {
     cover: '/imgs/portrait/cover-bg.jpg',
+    intro: '/imgs/portrait/couple-intro.jpg',
     groom: '/imgs/portrait/groom.jpg',
     bride: '/imgs/portrait/bride.jpg',
     formal: '/imgs/portrait/couple-formal.jpg',

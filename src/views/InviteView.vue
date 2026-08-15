@@ -92,8 +92,7 @@ onUnmounted(() => glowCleanup?.())
         :groom="config.couple.groom"
         :bride="config.couple.bride"
         :love-story="config.loveStory"
-        :groom-photo="config.portraits.groom"
-        :bride-photo="config.portraits.bride"
+        :photo="config.portraits.intro"
       />
       <PortraitStorySection
         :src="config.portraits.formal"

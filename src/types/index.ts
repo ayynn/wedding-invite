@@ -38,6 +38,8 @@ export interface GalleryItem {
 export interface PortraitAssets {
   /** 首页全出血背景 */
   cover: string
+  /** 新人介绍合照 */
+  intro: string
   /** 新郎单人像（白色影棚） */
   groom: string
   /** 新娘单人像（白色影棚） */

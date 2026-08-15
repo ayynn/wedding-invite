@@ -119,18 +119,19 @@ img {
 }
 .sec-title-en {
   font-family: var(--font-script);
-  font-size: clamp(38px, 7vw, 60px);
+  font-size: clamp(40px, 7.2vw, 62px);
   color: var(--gold);
-  line-height: 1.2;
+  line-height: 1.15;
   text-align: center;
 }
 .sec-title-cn {
   font-family: var(--font-hand);
   text-align: center;
-  font-size: clamp(26px, 4.6vw, 34px);
+  font-size: clamp(24px, 4.4vw, 32px);
   font-weight: 400;
-  letter-spacing: 0.18em;
-  margin-top: 6px;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  margin-top: 4px;
   color: var(--green-deep);
 }
 .sec-sub {
