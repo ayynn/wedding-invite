@@ -118,14 +118,15 @@ withDefaults(
 .frame {
   position: relative;
   margin: 46px auto 0;
-  width: min(560px, 100%);
+  width: min(720px, calc(100% - 20px));
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 .story.art .frame {
-  width: min(620px, 100%);
-  /* 艺术合照做轻微错落，脱离正中轴线 */
+  width: min(720px, calc(100% - 20px));
   margin-left: auto;
-  margin-right: 6%;
-  transform: rotate(-1.2deg);
+  margin-right: auto;
+  transform: none;
 }
 .frame .main {
   position: relative;
@@ -133,7 +134,7 @@ withDefaults(
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 6px;
+  border-radius: 28px;
 }
 .story.light .frame .main {
   filter: saturate(0.95) contrast(1.03) brightness(1.01);
@@ -143,13 +144,14 @@ withDefaults(
 }
 .frame .glow {
   position: absolute;
-  inset: -5%;
+  inset: 6% 10%;
   z-index: 0;
-  width: 110%;
-  height: 110%;
+  width: auto;
+  height: auto;
   object-fit: cover;
-  filter: blur(42px) saturate(1.3);
-  opacity: 0.55;
+  border-radius: 32px;
+  filter: blur(28px) saturate(1.15);
+  opacity: 0.4;
 }
 /* 浅色礼服在墨蓝底上会过曝，光晕压弱只保留氛围 */
 .story.ink .frame .glow {
@@ -170,7 +172,7 @@ figcaption {
   color: rgba(242, 231, 214, 0.72);
 }
 .story.art figcaption {
-  transform: rotate(1.2deg);
+  transform: none;
 }
 
 @media (max-width: 640px) {

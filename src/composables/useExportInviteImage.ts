@@ -188,7 +188,7 @@ export function useExportInviteImage(options: ExportInviteImageOptions) {
         width,
         scale: 2,
         quality: 0.88,
-        backgroundColor: '#f8f5f0',
+        backgroundColor: '#fbf8f3',
         // 不设 preferredFormat：data URL / truetype 子集都需保留，否则 src 会被滤空
         font: {
           cssText: fontCssText

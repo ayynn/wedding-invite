@@ -30,11 +30,11 @@ defineProps<{
 
 <style scoped>
 .tips {
-  background: linear-gradient(180deg, var(--green), var(--green-deep));
-  color: var(--ivory);
+  background: linear-gradient(180deg, #f6f1e8, #f3ece3);
+  color: var(--green-deep);
 }
 :deep(.sec-title-cn) {
-  color: var(--ivory);
+  color: var(--green-deep);
 }
 .tips-grid {
   display: grid;
@@ -43,8 +43,8 @@ defineProps<{
   margin-top: 44px;
 }
 .tip-card {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(232, 213, 163, 0.25);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(196, 174, 138, 0.32);
   border-radius: var(--radius);
   padding: 28px 22px;
   text-align: center;
@@ -52,13 +52,13 @@ defineProps<{
 }
 .tip-card:hover {
   transform: translateY(-8px);
-  background: rgba(255, 255, 255, 0.1);
+  background: #fff;
   border-color: var(--gold);
 }
 .ic {
   display: block;
   margin-bottom: 12px;
-  color: var(--gold-light);
+  color: var(--gold);
   transition: transform 0.4s;
 }
 .tip-card:hover .ic {
@@ -73,7 +73,7 @@ defineProps<{
 }
 .tip-card p {
   font-size: 12.5px;
-  color: rgba(243, 236, 221, 0.72);
+  color: var(--brown);
   line-height: 1.9;
 }
 </style>

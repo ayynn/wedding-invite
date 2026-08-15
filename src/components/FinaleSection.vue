@@ -42,8 +42,8 @@ defineProps<{
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: #1b2430;
-  color: var(--cream);
+  background: #f4efe6;
+  color: var(--green-deep);
   position: relative;
   overflow: hidden;
 }
@@ -54,10 +54,10 @@ defineProps<{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 30%;
+  object-position: 50% 28%;
   pointer-events: none;
   user-select: none;
-  filter: saturate(0.8) contrast(1.02) blur(1.5px);
+  filter: saturate(0.92) contrast(1.02) brightness(1.04);
   transform: scale(1.04);
 }
 .finale-shade {
@@ -66,8 +66,8 @@ defineProps<{
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(21, 28, 38, 0.86), rgba(27, 36, 48, 0.72)),
-    radial-gradient(90% 60% at 50% 42%, rgba(65, 83, 110, 0.32), transparent 70%);
+    linear-gradient(180deg, rgba(251, 248, 243, 0.78), rgba(244, 239, 230, 0.72)),
+    radial-gradient(90% 60% at 50% 42%, rgba(234, 217, 204, 0.28), transparent 70%);
 }
 .finale .wrap {
   position: relative;
@@ -92,13 +92,13 @@ defineProps<{
   0%,
   100% {
     text-shadow:
-      0 6px 40px rgba(0, 0, 0, 0.6),
+      0 6px 28px rgba(196, 174, 138, 0.28),
       0 0 0 rgba(232, 213, 163, 0);
   }
   50% {
     text-shadow:
-      0 6px 40px rgba(0, 0, 0, 0.6),
-      0 0 44px rgba(232, 213, 163, 0.55);
+      0 6px 28px rgba(196, 174, 138, 0.28),
+      0 0 36px rgba(196, 174, 138, 0.45);
   }
 }
 .f-sub {
@@ -106,17 +106,17 @@ defineProps<{
   font-size: 20px;
   letter-spacing: 0.28em;
   margin-top: 18px;
-  color: rgba(243, 236, 221, 0.85);
+  color: var(--brown);
 }
 .f-addr {
   font-family: var(--font-hand);
   margin-top: 34px;
   font-size: 15px;
-  color: rgba(243, 236, 221, 0.7);
+  color: var(--brown);
   letter-spacing: 0.1em;
 }
 .f-addr a {
-  color: var(--gold-light);
+  color: var(--ink-blue);
   text-decoration: none;
   border-bottom: 1px dotted var(--gold);
 }
@@ -127,7 +127,7 @@ defineProps<{
   z-index: 2;
   width: 100%;
   font-size: 12px;
-  color: rgba(243, 236, 221, 0.5);
+  color: rgba(92, 83, 72, 0.48);
   letter-spacing: 0.2em;
 }
 </style>

@@ -40,11 +40,11 @@ const { days, hours, minutes, seconds, expired } = useCountdown(props.target)
 
 <style scoped>
 .countdown-sec {
-  background: linear-gradient(180deg, var(--green-deep), var(--green));
-  color: var(--ivory);
+  background: linear-gradient(180deg, #f7f2ea, #f3ece2);
+  color: var(--green-deep);
 }
 :deep(.sec-title-cn) {
-  color: var(--ivory);
+  color: var(--green-deep);
 }
 .countdown-box {
   display: flex;
@@ -61,23 +61,23 @@ const { days, hours, minutes, seconds, expired } = useCountdown(props.target)
   font-family: var(--font-display-en);
   font-size: clamp(40px, 8vw, 64px);
   font-weight: 600;
-  color: var(--gold-light);
+  color: var(--gold);
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 34px rgba(232, 213, 163, 0.3);
+  text-shadow: 0 0 24px rgba(196, 174, 138, 0.28);
 }
 .lab {
   font-family: var(--font-hand);
   font-size: 15px;
   letter-spacing: 0.2em;
-  color: rgba(243, 236, 221, 0.7);
+  color: var(--brown);
   margin-top: 6px;
 }
 .cd-note {
   font-family: var(--font-hand);
   text-align: center;
   margin-top: 30px;
-  color: rgba(243, 236, 221, 0.65);
+  color: var(--brown);
   font-size: 15px;
   letter-spacing: 0.14em;
 }

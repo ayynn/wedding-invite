@@ -36,11 +36,11 @@ export interface GalleryItem {
 
 /** 婚纱照素材（人像 / 合照 / 封面） */
 export interface PortraitAssets {
-  /** 封面大图（建筑外景合照） */
+  /** 封面大图（白色影棚合照） */
   cover: string
-  /** 新郎单人像（影棚蓝底） */
+  /** 新郎单人像（白色影棚） */
   groom: string
-  /** 新娘单人像（影棚蓝底） */
+  /** 新娘单人像（白色影棚） */
   bride: string
   /** 端正合照（白底全身） */
   formal: string

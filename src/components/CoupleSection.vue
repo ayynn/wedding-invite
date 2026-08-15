@@ -22,7 +22,6 @@ defineProps<{
       <SectionTitle en="Beloved Couple" cn="新人 · 情定于此" />
 
       <div class="duo">
-        <!-- 新郎：图左名右 -->
         <article class="person groom reveal">
           <figure class="shot">
             <img class="glow" :src="groomPhoto" alt="" aria-hidden="true" />
@@ -39,7 +38,6 @@ defineProps<{
 
         <div class="amp reveal d1" aria-hidden="true">&amp;</div>
 
-        <!-- 新娘：图右名左，向上错落 -->
         <article class="person bride reveal d2">
           <figure class="shot">
             <img class="glow" :src="bridePhoto" alt="" aria-hidden="true" />
@@ -66,10 +64,9 @@ defineProps<{
 
 <style scoped>
 .couple {
-  background: linear-gradient(180deg, var(--cream) 0%, #f4f1ea 52%, var(--cream) 100%);
+  background: linear-gradient(180deg, var(--cream) 0%, #f7f3ec 52%, var(--cream) 100%);
 }
 
-/* 影棚蓝的呼应色斑，压在内容之下 */
 .tint {
   position: absolute;
   border-radius: 50%;
@@ -82,8 +79,8 @@ defineProps<{
   max-width: 460px;
   aspect-ratio: 1;
   left: -12%;
-  top: 14%;
-  background: rgba(65, 83, 110, 0.16);
+  top: 10%;
+  background: rgba(234, 217, 204, 0.55);
 }
 .tint-b {
   width: 40vw;
@@ -91,70 +88,59 @@ defineProps<{
   aspect-ratio: 1;
   right: -10%;
   bottom: 12%;
-  background: rgba(189, 167, 138, 0.2);
+  background: rgba(196, 174, 138, 0.18);
 }
 
 .duo {
-  margin-top: 52px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: clamp(12px, 3vw, 34px);
+  gap: 36px;
 }
 
 .person {
-  display: grid;
-  gap: 18px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-}
-/* 错落：新郎下沉，新娘上提，图文左右互换 */
-.groom {
-  grid-template-columns: 1.05fr 0.95fr;
-  transform: translateY(26px);
-}
-.bride {
-  grid-template-columns: 0.95fr 1.05fr;
-  transform: translateY(-26px);
-}
-.bride .shot {
-  order: 2;
-}
-.bride .meta {
-  order: 1;
-  text-align: right;
-}
-.bride .rule {
-  margin-left: auto;
+  gap: 22px;
 }
 
 .shot {
   position: relative;
-  aspect-ratio: 4 / 5;
+  width: min(720px, 100%);
+  aspect-ratio: 3 / 4;
+  padding: 0 18px;
+  box-sizing: border-box;
 }
 .shot .main {
   position: relative;
   z-index: 1;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 4px;
-  filter: saturate(0.94) contrast(1.02);
+  object-position: 50% 18%;
+  border-radius: 28px;
+  filter: saturate(0.96) contrast(1.02);
 }
-/* 背后的模糊副本，让照片像化进纸面 */
 .shot .glow {
   position: absolute;
-  inset: -6%;
+  inset: 4% 8%;
   z-index: 0;
-  width: 112%;
-  height: 112%;
+  width: auto;
+  height: auto;
   object-fit: cover;
-  filter: blur(30px) saturate(1.25);
-  opacity: 0.5;
-  transform: scale(1.02);
+  border-radius: 32px;
+  filter: blur(28px) saturate(1.15);
+  opacity: 0.42;
 }
 
 .meta {
+  text-align: center;
   min-width: 0;
+  padding: 0 16px;
 }
 .role {
   display: block;
@@ -166,14 +152,14 @@ defineProps<{
 .initial {
   margin-top: 8px;
   font-family: var(--font-script);
-  font-size: clamp(30px, 6.4vw, 46px);
+  font-size: clamp(34px, 8vw, 52px);
   font-weight: 400;
   line-height: 1;
   color: var(--ink-blue);
 }
 .name {
   margin-top: 8px;
-  font-size: clamp(17px, 3.4vw, 22px);
+  font-size: clamp(18px, 4vw, 24px);
   letter-spacing: 0.16em;
   color: var(--green-deep);
 }
@@ -181,33 +167,30 @@ defineProps<{
   display: block;
   width: 42px;
   height: 1px;
-  margin-top: 14px;
-  background: linear-gradient(90deg, var(--gold), transparent);
-}
-.bride .rule {
-  background: linear-gradient(270deg, var(--gold), transparent);
+  margin: 14px auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 .motto {
   margin-top: 12px;
   font-family: var(--font-hand);
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: 0.1em;
   color: var(--brown);
 }
 
 .amp {
   font-family: var(--font-script);
-  font-size: clamp(40px, 8vw, 72px);
+  font-size: clamp(40px, 10vw, 68px);
   line-height: 1;
   color: var(--gold);
   transform: rotate(-8deg);
-  text-shadow: 0 6px 24px rgba(189, 167, 138, 0.4);
+  text-shadow: 0 6px 24px rgba(196, 174, 138, 0.35);
 }
 
 .love {
   font-family: var(--font-hand);
   max-width: 620px;
-  margin: 64px auto 0;
+  margin: 48px auto 0;
   text-align: center;
   color: var(--green-soft);
   font-size: 17px;
@@ -215,29 +198,16 @@ defineProps<{
   letter-spacing: 0.06em;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 640px) {
   .duo {
-    grid-template-columns: 1fr;
-    gap: 26px;
-    margin-top: 40px;
+    gap: 28px;
+    margin-top: 28px;
   }
-  .groom,
-  .bride {
-    transform: none;
-    grid-template-columns: 1fr 1fr;
-  }
-  /* 竖屏保留左右错位，避免呆板 */
-  .groom {
-    margin-right: 8%;
-  }
-  .bride {
-    margin-left: 8%;
-  }
-  .amp {
-    justify-self: center;
+  .shot {
+    padding: 0 10px;
   }
   .love {
-    margin-top: 44px;
+    margin-top: 36px;
   }
 }
 </style>

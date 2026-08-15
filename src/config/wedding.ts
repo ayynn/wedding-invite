@@ -42,8 +42,8 @@ export const weddingConfig: WeddingConfig = {
   ],
 
   /**
-   * 婚纱照素材（public/imgs/portrait/ 下）
-   * 建议尺寸：人像 4:5 约 1000×1250，封面/合照长边 1600–2000，单张 300KB–1MB
+   * 婚纱照素材（public/imgs/portrait/ 下，白色影棚）
+   * 建议尺寸：人像 3:4 约 960×1280，单张 300KB–1MB
    */
   portraits: {
     cover: '/imgs/portrait/cover.jpg',
@@ -51,7 +51,7 @@ export const weddingConfig: WeddingConfig = {
     bride: '/imgs/portrait/bride.jpg',
     formal: '/imgs/portrait/couple-formal.jpg',
     art: '/imgs/portrait/couple-art.jpg',
-    finale: '/imgs/portrait/couple-art.jpg',
+    finale: '/imgs/portrait/couple-formal.jpg',
   },
 
   portraitStories: {
@@ -64,8 +64,8 @@ export const weddingConfig: WeddingConfig = {
     art: {
       en: 'Quiet Moments',
       cn: '静好时光',
-      sub: '镜头之外，是我们最自在的模样',
-      caption: '胶片记忆 · 一台旧相机与两个人',
+      sub: '依偎之间，是我们最自在的模样',
+      caption: '白色影棚 · 依偎静好',
     },
   },
 

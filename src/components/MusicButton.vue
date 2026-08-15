@@ -35,14 +35,14 @@ const emit = defineEmits<{
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--green), var(--green-deep));
-  color: var(--gold-light);
-  border: 1px solid rgba(232, 213, 163, 0.5);
+  background: linear-gradient(135deg, #d4c09a, #b89a72);
+  color: #fff;
+  border: 1px solid rgba(232, 213, 163, 0.55);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 30px rgba(20, 40, 30, 0.35);
+  box-shadow: 0 10px 28px rgba(92, 83, 72, 0.18);
   transition: all 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .music-btn:hover {

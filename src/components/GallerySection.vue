@@ -104,7 +104,7 @@ onUnmounted(() => {
   overflow: hidden;
   border-radius: var(--radius);
   cursor: pointer;
-  box-shadow: 0 8px 26px rgba(28, 46, 36, 0.14);
+  box-shadow: 0 8px 26px rgba(92, 83, 72, 0.08);
   background: #e8e2d4;
 }
 .g-item img {
@@ -122,7 +122,7 @@ onUnmounted(() => {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 55%, rgba(20, 36, 28, 0.55));
+  background: linear-gradient(180deg, transparent 55%, rgba(92, 83, 72, 0.38));
   opacity: 0;
   transition: 0.5s;
 }

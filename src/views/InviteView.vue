@@ -108,7 +108,7 @@ onUnmounted(() => glowCleanup?.())
         :src="config.portraits.art"
         v-bind="config.portraitStories.art"
         variant="art"
-        tone="ink"
+        tone="light"
       />
       <TipsSection :items="config.tips" :venue="config.venue" />
       <RsvpSection class="no-export" :endpoint="config.api.rsvpEndpoint" />
@@ -212,7 +212,7 @@ onUnmounted(() => glowCleanup?.())
   z-index: 95;
   display: grid;
   place-items: center;
-  background: rgba(16, 26, 20, 0.55);
+  background: rgba(92, 83, 72, 0.28);
   backdrop-filter: blur(4px);
 }
 

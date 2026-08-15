@@ -110,8 +110,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  background: #1b2430;
-  color: var(--cream);
+  background: #f4efe6;
+  color: var(--green-deep);
   overflow: hidden;
   cursor: pointer;
   transition: transform 1.05s cubic-bezier(0.72, 0.01, 0.24, 1), opacity 0.9s ease;
@@ -123,10 +123,10 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 34%;
+  object-position: 50% 42%;
   pointer-events: none;
   user-select: none;
-  filter: saturate(0.86) contrast(1.03) brightness(0.98);
+  filter: saturate(0.92) contrast(1.02) brightness(1.04);
 }
 .cover-shade {
   position: absolute;
@@ -136,11 +136,10 @@ onUnmounted(() => {
   background:
     linear-gradient(
       180deg,
-      rgba(20, 27, 37, 0.5) 0%,
-      rgba(24, 32, 43, 0.2) 42%,
-      rgba(20, 27, 37, 0.72) 100%
-    ),
-    linear-gradient(90deg, rgba(43, 58, 79, 0.28), transparent 42%, rgba(43, 58, 79, 0.28));
+      rgba(251, 248, 243, 0.78) 0%,
+      rgba(251, 248, 243, 0.28) 38%,
+      rgba(244, 239, 230, 0.82) 100%
+    );
 }
 .cover::after {
   content: '';
@@ -148,7 +147,7 @@ onUnmounted(() => {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 56%, transparent 24%, rgba(18, 24, 33, 0.58) 100%);
+  background: radial-gradient(ellipse at 50% 48%, transparent 28%, rgba(244, 239, 230, 0.42) 100%);
 }
 .cover.leaving {
   transform: translateY(-101%);
@@ -163,7 +162,7 @@ onUnmounted(() => {
   font-family: var(--font-hand);
   font-size: 15px;
   letter-spacing: 0.28em;
-  color: rgba(250, 246, 238, 0.8);
+  color: rgba(92, 83, 72, 0.72);
   cursor: default;
   user-select: none;
   -webkit-user-select: none;
@@ -206,7 +205,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 12px;
   margin: 16px auto 0;
-  color: var(--gold-light);
+  color: var(--gold);
 }
 .cover-ornament::before,
 .cover-ornament::after {
@@ -222,10 +221,10 @@ onUnmounted(() => {
   font-size: clamp(26px, 6vw, 34px);
   font-weight: 400;
   letter-spacing: 0.22em;
-  color: var(--gold-bright);
+  color: var(--green-deep);
   margin-top: 20px;
   text-indent: 0.22em;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  text-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -243,7 +242,7 @@ onUnmounted(() => {
   position: absolute;
   inset: -34px;
   margin: auto;
-  border: 1px solid rgba(232, 213, 163, 0.35);
+  border: 1px solid rgba(196, 174, 138, 0.42);
   border-radius: 50%;
   animation: ringSpin 38s linear infinite;
   pointer-events: none;
@@ -262,14 +261,14 @@ onUnmounted(() => {
   font-family: var(--font-hand);
   font-size: 17px;
   letter-spacing: 0.18em;
-  color: var(--gold-light);
+  color: var(--brown);
   margin-top: 22px;
 }
 .cover-venue {
   font-family: var(--font-hand);
   margin-top: 10px;
   font-size: 15px;
-  color: rgba(243, 236, 221, 0.85);
+  color: var(--brown);
   letter-spacing: 0.14em;
 }
 .cover-btn {
@@ -279,11 +278,11 @@ onUnmounted(() => {
   gap: 10px;
   padding: 15px 44px;
   border-radius: 60px;
-  border: 1px solid rgba(232, 213, 163, 0.7);
-  background: rgba(28, 46, 36, 0.38);
+  border: 1px solid rgba(196, 174, 138, 0.7);
+  background: rgba(255, 255, 255, 0.58);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  color: var(--gold-light);
+  color: var(--green-deep);
   letter-spacing: 0.22em;
   font-size: 16px;
   cursor: pointer;
@@ -311,7 +310,7 @@ onUnmounted(() => {
   font-family: var(--font-hand);
   font-size: 14px;
   letter-spacing: 0.16em;
-  color: rgba(243, 236, 221, 0.62);
+  color: rgba(92, 83, 72, 0.55);
   animation: hintFloat 2.2s ease-in-out infinite;
 }
 .cover-hint .arr {

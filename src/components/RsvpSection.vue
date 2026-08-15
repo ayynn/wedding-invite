@@ -273,16 +273,16 @@ async function confirmNotSameAndSubmit(): Promise<void> {
   letter-spacing: 0.16em;
   cursor: pointer;
   transition: 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
-  box-shadow: 0 10px 30px rgba(45, 74, 54, 0.3);
+  box-shadow: 0 10px 30px rgba(92, 83, 72, 0.16);
 }
 .submit:hover {
   background: var(--green-deep);
   transform: translateY(-3px);
-  box-shadow: 0 16px 40px rgba(45, 74, 54, 0.4);
+  box-shadow: 0 16px 40px rgba(92, 83, 72, 0.2);
 }
 .submit:active {
   transform: scale(0.97);
-  box-shadow: 0 6px 16px rgba(45, 74, 54, 0.25);
+  box-shadow: 0 6px 16px rgba(92, 83, 72, 0.14);
   transition: 0.1s;
 }
 .submit:disabled {
