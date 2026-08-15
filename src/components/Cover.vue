@@ -1,11 +1,11 @@
 <script setup lang="ts">
 defineOptions({ name: 'cover-section' })
 
-import { onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import type { WeddingConfig } from '@/types'
 
-defineProps<{
+const props = defineProps<{
   config: WeddingConfig
   opened: boolean
 }>()
@@ -16,12 +16,37 @@ const emit = defineEmits<{
 
 const router = useRouter()
 
-/** 顶部「婚礼邀请」双击 / 双击进入后台登录页 */
+/** 顶部标题双击进入后台登录页 */
 const DOUBLE_TAP_MS = 320
 let lastTitleTapAt = 0
 let scrollFired = false
 let scrollHandler: (() => void) | null = null
 let touchHandler: (() => void) | null = null
+
+const coverDate = computed(() => {
+  const d = new Date(props.config.weddingDate)
+  const months = [
+    'JANUARY',
+    'FEBRUARY',
+    'MARCH',
+    'APRIL',
+    'MAY',
+    'JUNE',
+    'JULY',
+    'AUGUST',
+    'SEPTEMBER',
+    'OCTOBER',
+    'NOVEMBER',
+    'DECEMBER'
+  ]
+  const year = d.getFullYear()
+  return {
+    month: months[d.getMonth()] || '',
+    day: String(d.getDate()).padStart(2, '0'),
+    yearLeft: 'TWENTY',
+    yearRight: String(year).slice(-2)
+  }
+})
 
 function goAdminLogin(): void {
   lastTitleTapAt = 0
@@ -71,32 +96,53 @@ onUnmounted(() => {
   <header class="cover" :class="{ leaving: opened }" @click="emit('open')">
     <img class="cover-bg" :src="config.portraits.cover" alt="" draggable="false" />
     <div class="cover-shade" aria-hidden="true"></div>
-    <div
-      class="cover-top"
-      @click="onTitleTap"
-      @dblclick="onTitleDblClick"
-    >INVITATION&nbsp;&nbsp;·&nbsp;&nbsp;婚礼邀请</div>
+
     <div class="cover-inner">
-      <div class="cover-logo-wrap">
-        <div class="cover-ring"></div>
-        <div class="cover-ring r2"></div>
-        <div class="cover-logo gold-text">
-          <template v-for="(part, i) in config.couple.logoParts" :key="i">
-            <span v-if="part === '&'" class="amp">&amp;</span>
-            <template v-else>{{ part }}</template>
-          </template>
+      <p
+        class="cover-eyebrow"
+        @click="onTitleTap"
+        @dblclick="onTitleDblClick"
+      >
+        please join us for
+      </p>
+      <p class="cover-kicker">THE WEDDING OF</p>
+
+      <h1 class="cover-script">
+        <template v-for="(part, i) in config.couple.logoParts" :key="i">
+          <span v-if="part === '&'" class="amp">&amp;</span>
+          <template v-else>{{ part }}</template>
+        </template>
+      </h1>
+
+      <p class="cover-names">
+        <span class="couple-name">{{ config.couple.groom.nameSpaced }}</span>
+        <span class="sep">&amp;</span>
+        <span class="couple-name">{{ config.couple.bride.nameSpaced }}</span>
+      </p>
+
+      <div class="cover-date" aria-label="婚礼日期">
+        <div class="date-side">
+          <span class="date-label">{{ coverDate.month }}</span>
+          <span class="date-num">{{ coverDate.day }}</span>
         </div>
-        <div class="cover-ornament">❦</div>
-        <div class="cover-names">
-          <b class="couple-name">{{ config.couple.groom.nameSpaced }}</b>
-          <span class="sep">·</span>
-          <b class="couple-name">{{ config.couple.bride.nameSpaced }}</b>
+        <div class="date-rule" aria-hidden="true"></div>
+        <div class="date-side">
+          <span class="date-label">{{ coverDate.yearLeft }}</span>
+          <span class="date-num">{{ coverDate.yearRight }}</span>
         </div>
       </div>
-      <div class="cover-date">{{ config.dateText }}</div>
-      <div class="cover-venue">{{ config.venue.name }}</div>
-      <button class="cover-btn no-export" @click.stop="emit('open')">✦ 打开这份邀请 ✦</button>
+
+      <div class="cover-venue">
+        <p class="venue-name">{{ config.venue.name }}</p>
+        <p class="venue-meta">{{ config.dateText }}</p>
+        <p class="venue-addr">{{ config.venue.address }}</p>
+      </div>
+
+      <button class="cover-btn no-export" type="button" @click.stop="emit('open')">
+        打开邀请
+      </button>
     </div>
+
     <div class="cover-hint no-export">上滑进入我们的故事<span class="arr">⌃</span></div>
   </header>
 </template>
@@ -107,14 +153,15 @@ onUnmounted(() => {
   inset: 0;
   z-index: 60;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  flex-direction: column;
-  background: #f4efe6;
-  color: var(--green-deep);
+  background: #ece7df;
+  color: #4a433c;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 1.05s cubic-bezier(0.72, 0.01, 0.24, 1), opacity 0.9s ease;
+  transition:
+    transform 1.05s cubic-bezier(0.72, 0.01, 0.24, 1),
+    opacity 0.9s ease;
 }
 .cover-bg {
   position: absolute;
@@ -123,10 +170,19 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 42%;
+  object-position: 50% 58%;
   pointer-events: none;
   user-select: none;
-  filter: saturate(0.92) contrast(1.02) brightness(1.04);
+  filter: saturate(0.9) contrast(1.02) brightness(1.02);
+  animation: bgDrift 18s ease-in-out infinite alternate;
+}
+@keyframes bgDrift {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.08) translate3d(0, -1.2%, 0);
+  }
 }
 .cover-shade {
   position: absolute;
@@ -136,190 +192,237 @@ onUnmounted(() => {
   background:
     linear-gradient(
       180deg,
-      rgba(251, 248, 243, 0.78) 0%,
-      rgba(251, 248, 243, 0.28) 38%,
-      rgba(244, 239, 230, 0.82) 100%
+      rgba(255, 252, 247, 0.72) 0%,
+      rgba(255, 252, 247, 0.28) 28%,
+      rgba(255, 252, 247, 0.08) 48%,
+      rgba(236, 231, 223, 0.18) 72%,
+      rgba(60, 52, 44, 0.22) 100%
     );
 }
-.cover::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 50% 48%, transparent 28%, rgba(244, 239, 230, 0.42) 100%);
-}
+
 .cover.leaving {
   transform: translateY(-101%);
   opacity: 0;
 }
-.cover-top {
-  position: absolute;
-  top: max(28px, env(safe-area-inset-top));
-  width: 100%;
-  text-align: center;
+
+.cover-inner {
+  position: relative;
   z-index: 3;
-  font-family: var(--font-hand);
-  font-size: 15px;
-  letter-spacing: 0.28em;
-  color: rgba(92, 83, 72, 0.72);
+  width: min(560px, 100%);
+  padding: max(56px, calc(env(safe-area-inset-top) + 36px)) 28px 120px;
+  text-align: center;
+  animation: coverRise 1.15s var(--ease) both;
+}
+@keyframes coverRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cover-eyebrow {
+  font-family: var(--font-display-en);
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+  color: rgba(74, 67, 60, 0.72);
   cursor: default;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  /* 扩大可点区域，方便移动端双击 */
-  padding: 12px 16px;
-  margin-top: -12px;
-}
-.cover-inner {
-  position: relative;
-  z-index: 3;
-  text-align: center;
-  padding: 0 24px;
-  max-width: 720px;
-}
-.cover-logo-wrap {
-  position: relative;
-  margin-bottom: 34px;
-}
-.cover-logo {
-  font-family: var(--font-script);
-  font-size: clamp(54px, 14vw, 104px);
-  line-height: 1.4;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
+  padding: 8px 12px;
+  margin: -8px auto 0;
   display: inline-block;
-  padding: 0.1em 0.18em;
-  margin-top: -0.06em;
-  margin-bottom: -0.1em;
 }
-.cover-logo .amp {
-  font-size: 0.5em;
-  vertical-align: 0.32em;
-  margin: 0 0.06em;
-  opacity: 0.85;
+.cover-kicker {
+  margin-top: 10px;
+  font-family: var(--font-display-en);
+  font-size: clamp(12px, 3.2vw, 14px);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  text-transform: uppercase;
+  color: rgba(74, 67, 60, 0.78);
 }
-.cover-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin: 16px auto 0;
-  color: var(--gold);
+
+.cover-script {
+  margin-top: 18px;
+  font-family: var(--font-script);
+  font-size: clamp(64px, 16vw, 108px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: #3f3832;
+  white-space: nowrap;
+  text-shadow: 0 10px 40px rgba(255, 252, 247, 0.55);
+  animation: scriptIn 1.35s cubic-bezier(0.2, 0.7, 0.2, 1) 0.12s both;
 }
-.cover-ornament::before,
-.cover-ornament::after {
-  content: '';
-  height: 1px;
-  width: min(90px, 24vw);
-  background: linear-gradient(90deg, transparent, var(--gold-light));
+@keyframes scriptIn {
+  from {
+    opacity: 0;
+    letter-spacing: 0.08em;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.01em;
+    transform: none;
+  }
 }
-.cover-ornament::after {
-  background: linear-gradient(90deg, var(--gold-light), transparent);
+.cover-script .amp {
+  display: inline-block;
+  font-size: 0.52em;
+  vertical-align: 0.18em;
+  margin: 0 0.04em;
+  opacity: 0.82;
 }
+
 .cover-names {
-  font-size: clamp(26px, 6vw, 34px);
-  font-weight: 400;
-  letter-spacing: 0.22em;
-  color: var(--green-deep);
-  margin-top: 20px;
-  text-indent: 0.22em;
-  text-shadow: none;
+  margin-top: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 0;
-}
-.cover-names b {
-  font-weight: 400;
+  gap: 0.35em;
+  font-size: clamp(15px, 3.8vw, 18px);
+  letter-spacing: 0.22em;
+  color: rgba(74, 67, 60, 0.88);
 }
 .cover-names .sep {
+  font-family: var(--font-script);
+  font-size: 1.15em;
+  letter-spacing: 0;
   opacity: 0.7;
-  margin: 0 0.1em;
 }
-.cover-ring {
-  position: absolute;
-  inset: -34px;
-  margin: auto;
-  border: 1px solid rgba(196, 174, 138, 0.42);
-  border-radius: 50%;
-  animation: ringSpin 38s linear infinite;
-  pointer-events: none;
-}
-.cover-ring.r2 {
-  inset: -50px;
-  border-style: dashed;
-  animation-duration: 58s;
-  animation-direction: reverse;
-  opacity: 0.45;
-}
-@keyframes ringSpin {
-  to { transform: rotate(360deg); }
-}
+
 .cover-date {
-  font-family: var(--font-hand);
-  font-size: 17px;
-  letter-spacing: 0.18em;
-  color: var(--brown);
+  margin: 28px auto 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  width: min(320px, 86%);
+  padding: 14px 0;
+  border-top: 1px solid rgba(74, 67, 60, 0.28);
+  border-bottom: 1px solid rgba(74, 67, 60, 0.28);
+}
+.date-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.date-label {
+  font-family: var(--font-display-en);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  color: rgba(74, 67, 60, 0.7);
+}
+.date-num {
+  font-family: var(--font-display-en);
+  font-size: clamp(28px, 7vw, 36px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  color: #3f3832;
+}
+.date-rule {
+  width: 1px;
+  height: 42px;
+  background: linear-gradient(180deg, transparent, rgba(74, 67, 60, 0.35), transparent);
+}
+
+.cover-venue {
   margin-top: 22px;
 }
-.cover-venue {
-  font-family: var(--font-hand);
-  margin-top: 10px;
-  font-size: 15px;
-  color: var(--brown);
-  letter-spacing: 0.14em;
+.venue-name {
+  font-family: var(--font-display-en);
+  font-size: clamp(13px, 3.4vw, 15px);
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  text-transform: uppercase;
+  color: rgba(74, 67, 60, 0.88);
 }
+.venue-meta,
+.venue-addr {
+  margin-top: 8px;
+  font-family: var(--font-display-en);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: rgba(74, 67, 60, 0.68);
+}
+.venue-addr {
+  font-family: var(--font-hand);
+  letter-spacing: 0.12em;
+}
+
 .cover-btn {
-  margin-top: 36px;
+  margin-top: 28px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 15px 44px;
-  border-radius: 60px;
-  border: 1px solid rgba(196, 174, 138, 0.7);
-  background: rgba(255, 255, 255, 0.58);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: var(--green-deep);
-  letter-spacing: 0.22em;
-  font-size: 16px;
+  justify-content: center;
+  min-width: 168px;
+  padding: 12px 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(74, 67, 60, 0.35);
+  background: rgba(255, 252, 247, 0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #3f3832;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  font-size: 13px;
   cursor: pointer;
-  font-family: var(--font-hand);
-  transition: all 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
-  animation: btnBreathe 2.6s ease-in-out infinite;
+  font-family: var(--font-display-en);
+  transition: all 0.35s var(--ease);
 }
 .cover-btn:active {
-  background: rgba(201, 168, 106, 0.65);
-  color: #1c2e24;
-  transform: scale(0.96);
-  border-color: var(--gold);
-  transition: all 0.15s ease;
+  transform: scale(0.97);
+  background: rgba(255, 252, 247, 0.72);
 }
-@keyframes btnBreathe {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 213, 163, 0.28); }
-  50% { box-shadow: 0 0 0 13px rgba(232, 213, 163, 0); }
-}
+
 .cover-hint {
   position: absolute;
-  bottom: max(26px, env(safe-area-inset-bottom));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 0;
   width: 100%;
-  text-align: center;
   z-index: 3;
+  text-align: center;
   font-family: var(--font-hand);
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 0.16em;
-  color: rgba(92, 83, 72, 0.55);
+  color: rgba(255, 252, 247, 0.88);
+  text-shadow: 0 2px 12px rgba(40, 34, 28, 0.35);
   animation: hintFloat 2.2s ease-in-out infinite;
 }
 .cover-hint .arr {
   display: block;
-  font-size: 16px;
-  margin-top: 4px;
+  font-size: 15px;
+  margin-top: 2px;
 }
 @keyframes hintFloat {
-  0%, 100% { transform: translateY(0); opacity: 0.55; }
-  50% { transform: translateY(7px); opacity: 1; }
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateY(7px);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 380px) {
+  .cover-inner {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .cover-script {
+    font-size: 58px;
+  }
 }
 </style>

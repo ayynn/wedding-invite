@@ -43,10 +43,10 @@ export const weddingConfig: WeddingConfig = {
 
   /**
    * 婚纱照素材（public/imgs/portrait/ 下，白色影棚）
-   * 建议尺寸：人像 3:4 约 960×1280，单张 300KB–1MB
+   * 建议尺寸：人像 3:4 约 960×1280，封面背景长边约 1280，单张 300KB–1MB
    */
   portraits: {
-    cover: '/imgs/portrait/cover.jpg',
+    cover: '/imgs/portrait/cover-bg.jpg',
     groom: '/imgs/portrait/groom.jpg',
     bride: '/imgs/portrait/bride.jpg',
     formal: '/imgs/portrait/couple-formal.jpg',
