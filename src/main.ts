@@ -1,5 +1,8 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import router from './router'
+import { applyShareMeta } from '@/utils/shareMeta'
 import '@/assets/css/main.css'
 
-createApp(App).mount('#app')
+applyShareMeta()
+createApp(App).use(router).mount('#app')

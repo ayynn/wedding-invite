@@ -1,4 +1,6 @@
 <script setup lang="ts">
+defineOptions({ name: 'couple-section' })
+
 import type { CoupleMember } from '@/types'
 import SectionTitle from './SectionTitle.vue'
 
@@ -6,37 +8,49 @@ defineProps<{
   groom: CoupleMember
   bride: CoupleMember
   loveStory: string[]
+  photo: string
 }>()
+
+function loveLineClass(line: string): string {
+  if (!line.trim()) return ''
+  return /[\u4e00-\u9fff]/.test(line) ? 'love-zh' : 'love-fr'
+}
 </script>
 
 <template>
   <section class="section couple">
+    <span class="tint tint-a" aria-hidden="true"></span>
+    <span class="tint tint-b" aria-hidden="true"></span>
+
     <div class="wrap">
       <SectionTitle en="Beloved Couple" cn="新人 · 情定于此" />
-      <div class="couple-card">
-        <div class="couple-item reveal">
-          <div class="avatar">
-            <span class="halo"></span>
-            <div class="initials">{{ groom.initial }}</div>
-          </div>
-          <h3>{{ groom.initial }}<span class="cn">{{ groom.name }}</span></h3>
-          <div class="line"></div>
-          <p>{{ groom.motto }}</p>
+
+      <figure class="portrait reveal">
+        <span class="portrait-frame" aria-hidden="true"></span>
+        <img class="glow" :src="photo" alt="" aria-hidden="true" />
+        <img class="main soft-edge" :src="photo" alt="新人合影" loading="lazy" />
+      </figure>
+
+      <div class="names reveal d1">
+        <div class="person">
+          <span class="role">THE GROOM</span>
+          <h3 class="initial">{{ groom.initial }}</h3>
+          <p class="name couple-name">{{ groom.nameSpaced }}</p>
         </div>
-        <div class="ampersand reveal d1">&amp;</div>
-        <div class="couple-item reveal d2">
-          <div class="avatar">
-            <span class="halo"></span>
-            <div class="initials">{{ bride.initial }}</div>
-          </div>
-          <h3>{{ bride.initial }}<span class="cn">{{ bride.name }}</span></h3>
-          <div class="line"></div>
-          <p>{{ bride.motto }}</p>
+
+        <div class="amp" aria-hidden="true">&amp;</div>
+
+        <div class="person">
+          <span class="role">THE BRIDE</span>
+          <h3 class="initial">{{ bride.initial }}</h3>
+          <p class="name couple-name">{{ bride.nameSpaced }}</p>
         </div>
       </div>
-      <p class="couple-love reveal d2">
+
+      <p class="love reveal d2">
         <template v-for="(line, i) in loveStory" :key="i">
-          {{ line }}<br v-if="i < loveStory.length - 1" />
+          <span :class="loveLineClass(line)">{{ line }}</span>
+          <br v-if="i < loveStory.length - 1" />
         </template>
       </p>
     </div>
@@ -44,102 +58,141 @@ defineProps<{
 </template>
 
 <style scoped>
-.couple-card {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
-  margin-top: 44px;
+.couple {
+  background: linear-gradient(180deg, var(--cream) 0%, #f7f3ec 52%, var(--cream) 100%);
 }
-.couple-item {
-  flex: 1 1 260px;
-  max-width: 330px;
-  text-align: center;
-  padding: 34px 22px;
-  position: relative;
-}
-.avatar {
-  width: 150px;
-  height: 150px;
-  margin: 0 auto 20px;
+
+.tint {
+  position: absolute;
   border-radius: 50%;
-  position: relative;
-  border: 2px solid var(--gold);
-  padding: 8px;
-  background: var(--ivory);
-  box-shadow: var(--shadow);
+  pointer-events: none;
+  filter: blur(80px);
+  z-index: 0;
 }
-.initials {
+.tint-a {
+  width: 44vw;
+  max-width: 440px;
+  aspect-ratio: 1;
+  left: -12%;
+  top: 8%;
+  background: rgba(234, 217, 204, 0.5);
+}
+.tint-b {
+  width: 38vw;
+  max-width: 380px;
+  aspect-ratio: 1;
+  right: -10%;
+  bottom: 10%;
+  background: rgba(196, 174, 138, 0.16);
+}
+
+.portrait {
+  position: relative;
+  margin: 44px auto 0;
+  width: min(560px, calc(100% - 8px));
+  aspect-ratio: 3 / 4;
+}
+.portrait-frame {
+  position: absolute;
+  inset: 14px;
+  z-index: 2;
+  border: 1px solid rgba(196, 174, 138, 0.5);
+  border-radius: 22px;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+.portrait .main {
+  position: relative;
+  z-index: 1;
+  display: block;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at 35% 30%, var(--gold-light), var(--gold) 70%);
-  font-family: 'Great Vibes', cursive;
-  font-size: 46px;
-  color: #fff;
-  text-shadow: 0 3px 12px rgba(120, 90, 40, 0.45);
+  object-fit: cover;
+  object-position: 50% 22%;
+  border-radius: 30px;
+  filter: saturate(0.97) contrast(1.02);
 }
-.halo {
+.portrait .glow {
   position: absolute;
-  inset: -16px;
-  border: 1px dashed rgba(201, 168, 106, 0.5);
-  border-radius: 50%;
-  animation: ringSpin 30s linear infinite;
+  inset: 5% 8%;
+  z-index: 0;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+  border-radius: 34px;
+  filter: blur(30px) saturate(1.12);
+  opacity: 0.38;
 }
-@keyframes ringSpin {
-  to { transform: rotate(360deg); }
+
+.names {
+  margin: 40px auto 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: clamp(14px, 4vw, 40px);
+  max-width: 560px;
 }
-.couple-item h3 {
-  font-size: clamp(24px, 5vw, 32px);
-  font-family: 'Great Vibes', cursive;
-  color: var(--green);
-  font-weight: 600;
-}
-.couple-item h3 .cn {
-  display: block;
-  font-family: 'Noto Serif SC', serif;
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-  color: var(--green-deep);
-  margin-top: 2px;
-}
-.couple-item p {
-  color: var(--brown);
-  font-size: 13px;
-  letter-spacing: 0.22em;
-  margin-top: 6px;
-}
-.line {
-  width: 46px;
-  height: 1px;
-  background: var(--gold);
-  margin: 14px auto;
-}
-.ampersand {
-  flex: 0 0 auto;
-  align-self: center;
-  font-family: 'Great Vibes', cursive;
-  font-size: 64px;
-  color: var(--gold);
-  padding: 0 18px;
-  transform: rotate(-8deg);
-  text-shadow: 0 6px 24px rgba(201, 168, 106, 0.4);
-}
-.couple-love {
-  max-width: 620px;
-  margin: 36px auto 0;
+.person {
+  min-width: 0;
   text-align: center;
-  color: #44544a;
-  font-size: 15px;
-  line-height: 2.2;
 }
+.role {
+  display: block;
+  font-family: var(--font-display-en);
+  font-size: 11px;
+  letter-spacing: 0.36em;
+  text-indent: 0.36em;
+  color: var(--brown);
+}
+.initial {
+  margin-top: 10px;
+  font-family: var(--font-script);
+  font-size: clamp(34px, 8vw, 46px);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ink-blue);
+}
+.name {
+  margin-top: 8px;
+  font-size: clamp(17px, 4vw, 21px);
+  letter-spacing: 0.16em;
+  color: var(--green-deep);
+}
+.amp {
+  align-self: center;
+  font-family: var(--font-script);
+  font-size: clamp(38px, 9vw, 56px);
+  line-height: 1;
+  color: var(--gold);
+}
+
+.love {
+  max-width: 640px;
+  margin: 46px auto 0;
+  text-align: center;
+  color: var(--green-soft);
+  font-size: 15.5px;
+  line-height: 2;
+}
+.love-fr {
+  font-family: 'Bodoni Moda', var(--font-display-en);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.08em;
+  letter-spacing: 0.01em;
+}
+.love-zh {
+  font-family: var(--font-serif);
+  letter-spacing: 0.08em;
+}
+
 @media (max-width: 640px) {
-  .ampersand {
-    padding: 10px 0;
+  .portrait {
+    margin-top: 32px;
+  }
+  .names {
+    margin-top: 32px;
+    gap: 12px;
   }
 }
 </style>

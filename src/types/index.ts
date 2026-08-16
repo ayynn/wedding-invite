@@ -3,133 +3,186 @@
 /** 新郎/新娘信息 */
 export interface CoupleMember {
   /** 英文名 / 花体字标识 */
-  initial: string
+  initial: string;
   /** 中文名 */
-  name: string
+  name: string;
   /** 中文名（带空格排版） */
-  nameSpaced: string
+  nameSpaced: string;
   /** 简短描述 */
-  motto: string
+  motto: string;
 }
 
 /** 场地信息 */
 export interface Venue {
   /** 场地名 */
-  name: string
+  name: string;
+  /** 场地英文名 */
+  engname: string;
   /** 完整地址 */
-  address: string
+  address: string;
   /** 地图链接（深链） */
-  mapUrl: string
+  mapUrl: string;
   /** 距离提示 */
-  transitHint: string
+  transitHint: string;
 }
 
 /** 画廊图片项 */
 export interface GalleryItem {
   /** 图片路径（public 下以 / 开头） */
-  src: string
+  src: string;
   /** 场景说明 */
-  caption: string
+  caption: string;
   /** 网格布局类名 */
-  span: 'g-1' | 'g-2'
+  span: 'g-1' | 'g-2';
+}
+
+/** 婚纱照素材（人像 / 合照 / 封面） */
+export interface PortraitAssets {
+  /** 首页全出血背景 */
+  cover: string;
+  /** 新人介绍合照 */
+  intro: string;
+  /** 新郎单人像（白色影棚） */
+  groom: string;
+  /** 新娘单人像（白色影棚） */
+  bride: string;
+  /** 端正合照（白底全身） */
+  formal: string;
+  /** 艺术合照（白底情绪） */
+  art: string;
+  /** 尾页大图 */
+  finale: string;
+}
+
+/** 合照展示区块文案 */
+export interface PortraitStory {
+  en: string;
+  cn: string;
+  sub: string;
+  caption: string;
 }
 
 /** 婚礼行程项 */
 export interface ScheduleItem {
-  time: string
-  title: string
-  desc: string
+  time: string;
+  title: string;
+  desc?: string;
 }
 
 /** 温馨提示卡片 */
 export interface TipItem {
   /** 图标类型（对应图标组件内 key） */
-  icon: 'location' | 'home' | 'attire' | 'camera' | 'love' | 'phone'
-  title: string
-  desc: string
+  icon: 'location' | 'home' | 'attire' | 'camera' | 'love' | 'phone';
+  title: string;
+  desc: string;
 }
 
 /** RSVP 表单负载 */
 export interface RsvpPayload {
-  name: string
-  phone: string
-  num: string
-  attend: 'yes' | 'no'
-  msg: string
-  time: string
+  name: string;
+  phone: string;
+  num: string;
+  attend: 'yes' | 'no';
+  msg: string;
+  time: string;
 }
 
 /** 图片墙上传负载 */
 export interface WallUploadPayload {
-  name: string
-  caption: string
+  name: string;
+  caption: string;
   /** base64 图片数据（data:image/...;base64,xxx） */
-  image: string
+  image: string;
   /** 压缩后图片宽高（PhotoSwipe 预览用） */
-  width: number
-  height: number
+  width: number;
+  height: number;
 }
 
 /** 图片墙条目（后端返回） */
 export interface WallItem {
-  id: string
-  name: string
-  caption: string
+  id: string;
+  name: string;
+  caption: string;
   /** 图片访问地址（相对 /wall/:id 或完整 URL） */
-  url: string
+  url: string;
   /** 原始图片宽高（PhotoSwipe 预览用） */
-  width: number
-  height: number
-  createdAt: string
+  width: number;
+  height: number;
+  /** 点赞数 */
+  likes: number;
+  createdAt: string;
 }
 
 /** API 端点配置 */
 export interface ApiConfig {
   /** RSVP 提交/查询接口 */
-  rsvpEndpoint: string
+  rsvpEndpoint: string;
   /** 图片墙接口 */
-  wallEndpoint: string
+  wallEndpoint: string;
 }
 
 /** 婚礼整体配置 */
 export interface WeddingConfig {
   couple: {
-    groom: CoupleMember
-    bride: CoupleMember
+    groom: CoupleMember;
+    bride: CoupleMember;
     /** 封面 & 尾页花体 Logo 分段（用于对 & 单独样式化） */
-    logoParts: string[]
+    logoParts: string[];
     /** 新人落款 */
-    names: string
-  }
+    names: string;
+  };
   /** 婚礼日期（本地时区） */
-  weddingDate: string
+  weddingDate: string;
   /** 日期展示文案 */
-  dateText: string
+  dateText: string;
   /** 农历/吉日提示 */
-  dateSubText: string
-  venue: Venue
-  loveStory: string[]
-  gallery: GalleryItem[]
-  schedule: ScheduleItem[]
-  tips: TipItem[]
+  dateSubText: string;
+  venue: Venue;
+  loveStory: string[];
+  /** 婚纱照素材路径 */
+  portraits: PortraitAssets;
+  /** 端正合照 / 艺术合照文案 */
+  portraitStories: {
+    formal: PortraitStory;
+    art: PortraitStory;
+  };
+  gallery: GalleryItem[];
+  schedule: ScheduleItem[];
+  tips: TipItem[];
   /** 配乐 */
   bgm: {
-    src: string
-    title: string
-    artist: string
+    src: string;
+    title: string;
+    artist: string;
     /** 默认音量 0-1 */
-    volume: number
-  }
+    volume: number;
+  };
   /** API 端点（CloudBase 同域部署用相对路径） */
-  api: ApiConfig
+  api: ApiConfig;
   /** 图片墙 */
   wall: {
-    title: string
-    en: string
-    sub: string
+    title: string;
+    en: string;
+    sub: string;
     /** 单张图片最大尺寸（长边 px，前端压缩用） */
-    maxSize: number
+    maxSize: number;
     /** 单张图片最大体积（字节，超出提示） */
-    maxBytes: number
-  }
+    maxBytes: number;
+  };
+  /** 分享给朋友 */
+  share: {
+    /** 对外分享链接（建议使用线上正式地址） */
+    url: string;
+    /** 分享标题 */
+    title: string;
+    /** 分享描述 */
+    text: string;
+    /**
+     * 微信/OG 分享缩略图（public 下路径，约 1:1）。
+     * 链接预览依赖页面 meta 的绝对 HTTPS og:image；微信内 JS 改写分享卡需公众号 JS-SDK。
+     */
+    image: string;
+    /** 分享二维码卡片图（public 下路径） */
+    qrImage: string;
+  };
 }

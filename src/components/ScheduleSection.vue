@@ -10,13 +10,13 @@ defineProps<{
 <template>
   <section class="section schedule">
     <div class="wrap">
-      <SectionTitle en="Wedding Schedule" cn="婚礼流程" />
+      <SectionTitle en="Schedule" cn="婚礼流程 · Wedding Schedule" />
       <div class="timeline">
         <div v-for="(item, i) in items" :key="item.time" class="t-item reveal" :class="i % 2 === 0 ? 'd0' : 'd1'">
           <div class="t-dot"></div>
           <div class="t-time">{{ item.time }}</div>
           <div class="t-title">{{ item.title }}</div>
-          <div class="t-desc">{{ item.desc }}</div>
+          <div v-if="item.desc" class="t-desc">{{ item.desc }}</div>
         </div>
       </div>
     </div>
@@ -77,16 +77,17 @@ defineProps<{
   }
 }
 .t-time {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-display-en);
   color: var(--gold);
   font-size: 26px;
   font-weight: 600;
 }
 .t-title {
-  font-size: 18px;
-  font-weight: 500;
+  font-family: var(--font-hand);
+  font-size: 20px;
+  font-weight: 400;
   margin: 6px 0 4px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
 }
 .t-desc {
   font-size: 13px;

@@ -1,66 +1,171 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
-import type { WeddingConfig } from '@/types'
+defineOptions({ name: 'cover-section' });
 
-defineProps<{
-  config: WeddingConfig
-  opened: boolean
-}>()
+import { computed, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+import type { WeddingConfig } from '@/types';
+
+const props = defineProps<{
+  config: WeddingConfig;
+  opened: boolean;
+}>();
 
 const emit = defineEmits<{
-  (e: 'open'): void
-}>()
+  (e: 'open'): void;
+}>();
 
-let scrollFired = false
-let scrollHandler: (() => void) | null = null
-let touchHandler: (() => void) | null = null
+const router = useRouter();
+
+/** 顶部标题双击进入后台登录页 */
+const DOUBLE_TAP_MS = 320;
+let lastTitleTapAt = 0;
+let scrollFired = false;
+let scrollHandler: (() => void) | null = null;
+let touchHandler: (() => void) | null = null;
+
+const coverDate = computed(() => {
+  const d = new Date(props.config.weddingDate);
+  const months = [
+    'JANUARY',
+    'FEBRUARY',
+    'MARCH',
+    'APRIL',
+    'MAY',
+    'JUNE',
+    'JULY',
+    'AUGUST',
+    'SEPTEMBER',
+    'OCTOBER',
+    'NOVEMBER',
+    'DECEMBER',
+  ];
+  const year = d.getFullYear();
+  return {
+    month: months[d.getMonth()] || '',
+    day: String(d.getDate()).padStart(2, '0'),
+    yearLeft: 'TWENTY',
+    yearRight: String(year).slice(-2),
+  };
+});
+
+function goAdminLogin(): void {
+  lastTitleTapAt = 0;
+  void router.push({ name: 'admin-login' });
+}
+
+function onTitleTap(e: Event): void {
+  e.stopPropagation();
+  const now = Date.now();
+  if (now - lastTitleTapAt <= DOUBLE_TAP_MS) {
+    goAdminLogin();
+    return;
+  }
+  lastTitleTapAt = now;
+}
+
+function onTitleDblClick(e: Event): void {
+  e.stopPropagation();
+  e.preventDefault();
+  goAdminLogin();
+}
 
 function onScroll(): void {
-  if (scrollFired || window.scrollY <= 34) return
-  scrollFired = true
-  emit('open')
+  if (scrollFired || window.scrollY <= 34) return;
+  scrollFired = true;
+  emit('open');
 }
 
 onMounted(() => {
-  scrollHandler = onScroll
-  window.addEventListener('scroll', onScroll, { passive: true })
-  window.addEventListener('wheel', onScroll, { passive: true })
+  scrollHandler = onScroll;
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('wheel', onScroll, { passive: true });
   touchHandler = () => {
-    if (window.scrollY > 0) onScroll()
-  }
-  window.addEventListener('touchmove', touchHandler, { passive: true })
-})
+    if (window.scrollY > 0) onScroll();
+  };
+  window.addEventListener('touchmove', touchHandler, { passive: true });
+});
 
 onUnmounted(() => {
-  if (scrollHandler) window.removeEventListener('scroll', scrollHandler)
-  window.removeEventListener('wheel', onScroll)
-  if (touchHandler) window.removeEventListener('touchmove', touchHandler)
-})
+  if (scrollHandler) window.removeEventListener('scroll', scrollHandler);
+  window.removeEventListener('wheel', onScroll);
+  if (touchHandler) window.removeEventListener('touchmove', touchHandler);
+});
 </script>
 
 <template>
-  <header class="cover" :class="{ leaving: opened }" @click="emit('open')">
-    <div class="cover-top">INVITATION&nbsp;&nbsp;·&nbsp;&nbsp;婚礼邀请</div>
+  <header
+    class="cover"
+    :class="{ leaving: opened }"
+    @click="emit('open')"
+  >
+    <img
+      class="cover-bg"
+      :src="config.portraits.cover"
+      alt=""
+      draggable="false"
+    />
+    <div
+      class="cover-shade"
+      aria-hidden="true"
+    ></div>
+
     <div class="cover-inner">
-      <div class="cover-logo-wrap">
-        <div class="cover-ring"></div>
-        <div class="cover-ring r2"></div>
-        <div class="cover-logo gold-text">
-          <template v-for="(part, i) in config.couple.logoParts" :key="i">
-            <span v-if="part === '&'" class="amp">&amp;</span>
-            <template v-else>{{ part }}</template>
-          </template>
+      <p
+        class="cover-eyebrow"
+        @click="onTitleTap"
+        @dblclick="onTitleDblClick"
+      >
+        Save The Date
+      </p>
+
+      <p class="cover-names">
+        <span class="couple-name">{{ config.couple.groom.nameSpaced }}</span>
+        <span
+          class="sep"
+          aria-hidden="true"
+          >·</span
+        >
+        <span class="couple-name">{{ config.couple.bride.nameSpaced }}</span>
+      </p>
+
+      <div
+        class="cover-trio"
+        aria-label="婚礼日期"
+      >
+        <div class="trio-date">
+          <span class="date-label">{{ coverDate.month }}</span>
+          <span class="date-num">{{ coverDate.day }}</span>
         </div>
-        <div class="cover-ornament">❦</div>
-        <div class="cover-names">
-          <b>{{ config.couple.groom.nameSpaced }}</b><span class="sep">·</span><b>{{ config.couple.bride.nameSpaced }}</b>
+
+        <h1
+          class="trio-monogram"
+          :aria-label="config.couple.logoParts.join(' ')"
+        >
+          <span
+            v-for="(part, i) in config.couple.logoParts"
+            :key="i"
+            :class="{ amp: part === '&' }"
+          >
+            {{ part }}
+          </span>
+        </h1>
+
+        <div class="trio-date">
+          <span class="date-label">{{ coverDate.yearLeft }}</span>
+          <span class="date-num">{{ coverDate.yearRight }}</span>
         </div>
       </div>
-      <div class="cover-date">{{ config.dateText }}</div>
-      <div class="cover-venue">{{ config.venue.name }}</div>
-      <button class="cover-btn" @click.stop="emit('open')">✦ 打开这份邀请 ✦</button>
+
+      <div class="cover-venue">
+        <p class="venue-name">{{ config.venue.name }}</p>
+        <p class="venue-name">{{ config.venue.engname }}</p>
+        <p class="venue-meta">{{ config.dateText }}</p>
+      </div>
     </div>
-    <div class="cover-hint">上滑进入我们的故事<span class="arr">⌃</span></div>
+
+    <div class="cover-hint no-export">
+      上滑进入我们的故事<span class="arr">⌃</span>
+    </div>
   </header>
 </template>
 
@@ -70,179 +175,262 @@ onUnmounted(() => {
   inset: 0;
   z-index: 60;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  flex-direction: column;
-  background:
-    linear-gradient(180deg, rgba(16, 28, 22, 0.42) 0%, rgba(16, 28, 22, 0.16) 55%, rgba(28, 46, 36, 0.58) 100%),
-    url('/imgs/venue_01.jpg') center / cover no-repeat;
-  color: var(--cream);
+  background: #ece7df;
+  color: #4a433c;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 1.05s cubic-bezier(0.72, 0.01, 0.24, 1), opacity 0.9s ease;
+  transition:
+    transform 1.05s cubic-bezier(0.72, 0.01, 0.24, 1),
+    opacity 0.9s ease;
 }
-.cover::after {
-  content: '';
+.cover-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 58%, transparent 26%, rgba(16, 26, 20, 0.5) 100%);
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  transform-origin: right center;
+  pointer-events: none;
+  user-select: none;
+  filter: saturate(0.92) contrast(1.02) brightness(1.02);
+  animation: bgDrift 22s ease-in-out infinite alternate;
 }
+@keyframes bgDrift {
+  from {
+    transform: scale(1.01) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.03) translate3d(0, -0.6%, 0);
+  }
+}
+.cover-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 252, 247, 0.72) 0%,
+    rgba(255, 252, 247, 0.28) 28%,
+    rgba(255, 252, 247, 0.08) 48%,
+    rgba(236, 231, 223, 0.18) 72%,
+    rgba(60, 52, 44, 0.22) 100%
+  );
+}
+
 .cover.leaving {
   transform: translateY(-101%);
   opacity: 0;
 }
-.cover-top {
-  position: absolute;
-  top: max(28px, env(safe-area-inset-top));
-  width: 100%;
-  text-align: center;
-  z-index: 3;
-  font-size: 13px;
-  letter-spacing: 0.5em;
-  color: rgba(250, 246, 238, 0.8);
-}
+
 .cover-inner {
   position: relative;
   z-index: 3;
+  width: min(560px, 100%);
+  padding: max(36px, calc(env(safe-area-inset-top) + 36px)) 28px 80px;
   text-align: center;
-  padding: 0 24px;
-  max-width: 720px;
+  animation: coverRise 1.15s var(--ease) both;
 }
-.cover-logo-wrap {
-  position: relative;
-  margin-bottom: 34px;
+@keyframes coverRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-.cover-logo {
-  font-family: 'Great Vibes', cursive;
-  font-size: clamp(54px, 14vw, 104px);
-  line-height: 1.4;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  display: inline-block;
-  padding: 0.1em 0.18em;
-  margin-top: -0.06em;
-  margin-bottom: -0.1em;
+
+.cover-eyebrow {
+  font-family: 'Bodoni Moda', var(--font-display-en);
+  font-size: clamp(40px, 10vw, 54px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgba(74, 67, 60, 0.72);
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  padding: 0px 12px;
+  margin: -8px auto 0;
+  display: inline-flex;
+  align-items: center;
 }
-.cover-logo .amp {
-  font-size: 0.5em;
-  vertical-align: 0.32em;
-  margin: 0 0.06em;
-  opacity: 0.85;
+.cover-kicker {
+  margin-top: 12px;
+  font-family: var(--font-display-en);
+  font-size: clamp(12px, 3.2vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.46em;
+  text-indent: 0.46em;
+  text-transform: uppercase;
+  color: rgba(74, 67, 60, 0.8);
 }
-.cover-ornament {
+
+.cover-names {
+  margin-top: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin: 16px auto 0;
-  color: var(--gold-light);
+  gap: 0.35em;
+  font-size: clamp(15px, 3.8vw, 18px);
+  letter-spacing: 0.22em;
+  color: rgba(74, 67, 60, 0.88);
 }
-.cover-ornament::before,
-.cover-ornament::after {
-  content: '';
-  height: 1px;
-  width: min(90px, 24vw);
-  background: linear-gradient(90deg, transparent, var(--gold-light));
-}
-.cover-ornament::after {
-  background: linear-gradient(90deg, var(--gold-light), transparent);
-}
-.cover-names {
-  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
-  font-size: clamp(23px, 5.4vw, 28px);
-  font-weight: 500;
-  letter-spacing: 0.5em;
-  color: var(--gold-bright);
-  margin-top: 20px;
-  text-indent: 0.5em;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
-}
-.cover-names b {
-  font-weight: 500;
+.cover-names .couple-name {
+  font-family: var(--font-cover-name);
 }
 .cover-names .sep {
-  opacity: 0.7;
-  margin: 0 0.1em;
-}
-.cover-ring {
-  position: absolute;
-  inset: -34px;
-  margin: auto;
-  border: 1px solid rgba(232, 213, 163, 0.35);
-  border-radius: 50%;
-  animation: ringSpin 38s linear infinite;
-  pointer-events: none;
-}
-.cover-ring.r2 {
-  inset: -50px;
-  border-style: dashed;
-  animation-duration: 58s;
-  animation-direction: reverse;
-  opacity: 0.45;
-}
-@keyframes ringSpin {
-  to { transform: rotate(360deg); }
-}
-.cover-date {
-  font-size: 15px;
-  letter-spacing: 0.32em;
-  color: var(--gold-light);
-  margin-top: 22px;
-}
-.cover-venue {
-  margin-top: 10px;
-  font-size: 13px;
-  color: rgba(243, 236, 221, 0.85);
-  letter-spacing: 0.24em;
-}
-.cover-btn {
-  margin-top: 36px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 15px 44px;
-  border-radius: 60px;
-  border: 1px solid rgba(232, 213, 163, 0.7);
-  background: rgba(28, 46, 36, 0.38);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: var(--gold-light);
-  letter-spacing: 0.4em;
-  font-size: 14px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
-  animation: btnBreathe 2.6s ease-in-out infinite;
+  justify-content: center;
+  width: 0.7em;
+  font-family: var(--font-serif);
+  font-size: 1.05em;
+  line-height: 1;
+  letter-spacing: 0;
+  color: rgba(74, 67, 60, 0.55);
 }
-.cover-btn:active {
-  background: rgba(201, 168, 106, 0.65);
-  color: #1c2e24;
-  transform: scale(0.96);
-  border-color: var(--gold);
-  transition: all 0.15s ease;
+
+.cover-trio {
+  margin: 28px auto 0;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  justify-content: center;
+  align-items: center;
+  column-gap: 40px;
+  width: 100%;
 }
-@keyframes btnBreathe {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 213, 163, 0.28); }
-  50% { box-shadow: 0 0 0 13px rgba(232, 213, 163, 0); }
+.trio-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  gap: 2px;
+  min-width: 64px;
+  padding: 10px 4px;
+  border-top: 1px solid rgba(74, 67, 60, 0.32);
+  border-bottom: 1px solid rgba(74, 67, 60, 0.32);
 }
+.date-label {
+  font-family: var(--font-display-en);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  color: rgba(74, 67, 60, 0.7);
+}
+.date-num {
+  font-family: var(--font-display-en);
+  font-size: clamp(26px, 6.4vw, 34px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  color: #3f3832;
+}
+.trio-monogram {
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-script);
+  font-size: clamp(45px, 8vw, 68px);
+  font-weight: 400;
+  line-height: 0.72;
+  letter-spacing: 0.01em;
+  color: #3f3832;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4),
+    0 12px 36px rgba(255, 252, 247, 0.72);
+  animation: scriptIn 1.35s cubic-bezier(0.2, 0.7, 0.2, 1) 0.12s both;
+}
+.trio-monogram .amp {
+  font-size: 0.7em;
+  line-height: 0.68;
+  opacity: 0.82;
+  transform: translateX(0.6em);
+}
+@keyframes scriptIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cover-venue {
+  margin-top: 22px;
+}
+.venue-name {
+  font-family: var(--font-display-en);
+  font-size: clamp(13px, 3.4vw, 15px);
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  text-transform: uppercase;
+  color: rgba(74, 67, 60, 0.88);
+}
+.venue-meta {
+  margin-top: 8px;
+  font-family: var(--font-display-en);
+  font-size: 18px;
+  letter-spacing: 0.16em;
+  color: rgba(74, 67, 60, 0.68);
+}
+
 .cover-hint {
   position: absolute;
-  bottom: max(26px, env(safe-area-inset-bottom));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 0;
   width: 100%;
-  text-align: center;
   z-index: 3;
-  font-size: 12px;
-  letter-spacing: 0.3em;
-  color: rgba(243, 236, 221, 0.62);
+  text-align: center;
+  font-family: var(--font-hand);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  color: rgba(255, 252, 247, 0.88);
+  text-shadow: 0 2px 12px rgba(40, 34, 28, 0.35);
   animation: hintFloat 2.2s ease-in-out infinite;
 }
 .cover-hint .arr {
   display: block;
-  font-size: 16px;
-  margin-top: 4px;
+  font-size: 15px;
+  margin-top: 2px;
 }
 @keyframes hintFloat {
-  0%, 100% { transform: translateY(0); opacity: 0.55; }
-  50% { transform: translateY(7px); opacity: 1; }
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translateY(7px);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 380px) {
+  .cover-inner {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .cover-trio {
+    column-gap: 26px;
+  }
+  .date-label {
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-indent: 0.16em;
+  }
 }
 </style>

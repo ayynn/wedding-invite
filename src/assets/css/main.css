@@ -1,18 +1,49 @@
 /* ============ 全局主题与基础 ============ */
+
+/**
+ * 主题取色自白色影棚婚纱照：奶油白、浅香槟、暖灰褐字。
+ * 变量名沿用旧命名，仅替换色值，保证所有既有组件同步换肤。
+ */
 :root {
-  --green-deep: #1c2e24;
-  --green: #2d4a36;
-  --green-soft: #4a6b52;
-  --gold: #c9a86a;
-  --gold-light: #e8d5a3;
-  --gold-bright: #f7e7c3;
-  --cream: #faf6ee;
-  --ivory: #f3ecdd;
-  --brown: #8a7350;
-  --shadow: 0 16px 48px rgba(20, 40, 30, 0.18);
+  --green-deep: #5c5348;
+  --green: #8a7f72;
+  --green-soft: #9a9084;
+  --gold: #c4ae8a;
+  --gold-light: #e4d4b8;
+  --gold-bright: #f6efe3;
+  --cream: #fbf8f3;
+  --ivory: #f4efe6;
+  --brown: #9a8f82;
+  /* 暖石色，沿用 ink-blue 变量名以免改组件 */
+  --ink-blue: #7a6e62;
+  --ink-blue-deep: #6b6156;
+  --stone: #e4ddd2;
+  --blush: #ead9cc;
+  --shadow: 0 16px 48px rgba(92, 83, 72, 0.08);
   --radius: 18px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* 正文宋体；手写展示马善政；新人姓名楷书（文楷含「旻」） */
+  --font-serif: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
+  --font-hand: 'Ma Shan Zheng', 'Noto Serif SC', cursive;
+  --font-name: 'LXGW WenKai', 'Noto Serif SC', serif;
+  --font-script: 'Great Vibes', cursive;
+  --font-display-en: 'Cormorant Garamond', 'Noto Serif SC', serif;
+  --font-cover-name: 'XianSheng GaiZenMeChengNi', var(--font-hand);
 }
+
+@font-face {
+  font-family: 'XianSheng GaiZenMeChengNi';
+  src: url('@/assets/fonts/XianSheng-GaiZenMeChengNi-names.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 新郎 / 新娘中文名：与封面一致 */
+.couple-name {
+  font-family: var(--font-cover-name);
+}
+
 
 * {
   margin: 0;
@@ -26,12 +57,19 @@ html {
 }
 
 body {
-  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-family: var(--font-serif);
   background: var(--cream);
   color: var(--green-deep);
   overflow-x: hidden;
   line-height: 1.8;
   -webkit-text-size-adjust: 100%;
+}
+
+/* 输入控件保持可读，不跟书法展示字 */
+input,
+textarea,
+select {
+  font-family: var(--font-serif);
 }
 
 ::selection {
@@ -54,14 +92,26 @@ img {
   user-select: none;
 }
 
-/* ============ 金色花体 Logo ============ */
+/* ============ 香槟花体 Logo ============ */
 .gold-text {
-  background: linear-gradient(135deg, #fdf3d3 0%, #e8c98a 28%, #c9a86a 52%, #f0d9a8 74%, #b8904f 100%);
+  background: linear-gradient(135deg, #fbf3e6 0%, #e3d2b4 28%, #bda78a 52%, #eaddc4 74%, #a58e6d 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  filter: drop-shadow(0 3px 16px rgba(201, 168, 106, 0.4));
+  filter: drop-shadow(0 3px 16px rgba(189, 167, 138, 0.38));
+}
+
+/* ============ 柔化图片边缘（圆角 + 羽化） ============ */
+.soft-edge {
+  border-radius: 28px;
+  -webkit-mask-image: radial-gradient(ellipse 96% 94% at 50% 48%, #000 62%, rgba(0, 0, 0, 0.45) 82%, transparent 98%);
+  mask-image: radial-gradient(ellipse 96% 94% at 50% 48%, #000 62%, rgba(0, 0, 0, 0.45) 82%, transparent 98%);
+}
+.soft-edge-y {
+  border-radius: 24px;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
 }
 
 /* ============ 章节基础 ============ */
@@ -77,26 +127,29 @@ img {
   z-index: 2;
 }
 .sec-title-en {
-  font-family: 'Great Vibes', cursive;
-  font-size: clamp(38px, 7vw, 60px);
+  font-family: var(--font-script);
+  font-size: clamp(40px, 7.2vw, 62px);
   color: var(--gold);
-  line-height: 1.2;
+  line-height: 1.15;
   text-align: center;
 }
 .sec-title-cn {
+  font-family: var(--font-hand);
   text-align: center;
-  font-size: clamp(22px, 4vw, 30px);
-  font-weight: 500;
-  letter-spacing: 0.35em;
-  margin-top: 6px;
+  font-size: clamp(24px, 4.4vw, 32px);
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  margin-top: 4px;
   color: var(--green-deep);
 }
 .sec-sub {
+  font-family: var(--font-hand);
   text-align: center;
   color: var(--brown);
   margin-top: 14px;
-  font-size: 14px;
-  letter-spacing: 0.2em;
+  font-size: 16px;
+  letter-spacing: 0.12em;
 }
 .divider {
   display: flex;
@@ -160,7 +213,7 @@ img {
   animation-name: petalFall;
   animation-timing-function: ease-in;
   animation-iteration-count: infinite;
-  box-shadow: 0 0 6px rgba(201, 168, 106, 0.25);
+  box-shadow: 0 0 6px rgba(189, 167, 138, 0.25);
 }
 @keyframes petalFall {
   0% {
@@ -176,7 +229,7 @@ img {
 .firefly {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff8d6 0%, #e8d5a3 40%, transparent 72%);
+  background: radial-gradient(circle, #fdf6e8 0%, #ddcdb4 40%, transparent 72%);
   animation: fly 7s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
@@ -194,7 +247,7 @@ img {
   border-radius: 50%;
   pointer-events: none;
   z-index: 78;
-  background: radial-gradient(circle, rgba(201, 168, 106, 0.16) 0%, rgba(201, 168, 106, 0.05) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(196, 174, 138, 0.18) 0%, rgba(234, 217, 204, 0.08) 40%, transparent 70%);
   transform: translate(-50%, -50%);
   transition: opacity 0.4s;
   opacity: 0;

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>婚礼邀请函 · 分享二维码</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      background: radial-gradient(circle at 30% 20%, #3d5c45, #1c2e24 60%, #0f1a14);
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif; color: #f7e7c3;
+    }
+    .box { text-align: center; padding: 24px; }
+    img {
+      width: min(92vw, 420px); height: auto; border-radius: 20px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.45);
+    }
+    a {
+      display: inline-block; margin-top: 22px; padding: 12px 28px; border-radius: 999px;
+      background: linear-gradient(135deg, #e8c98a, #c9a86a); color: #1c2e24;
+      text-decoration: none; font-weight: 600; letter-spacing: .08em;
+    }
+    p { opacity: .75; font-size: 14px; margin-top: 14px; word-break: break-all; max-width: 420px; margin-inline: auto; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <img src="./invite-card.png" alt="婚礼邀请函二维码" />
+    <div>
+      <a href="./invite-card.png" download="wedding-invite-qr.png">下载 PNG</a>
+      <a href="./invite-card.svg" download="wedding-invite-qr.svg" style="margin-left:10px">下载 SVG</a>
+    </div>
+    <p>扫码直达：https://wedding-invite-d9gdvtmrr73ff6b75-1461874135.ap-shanghai.app.tcloudbase.com</p>
+  </div>
+</body>
+</html>
