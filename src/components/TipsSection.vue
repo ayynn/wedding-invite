@@ -75,5 +75,6 @@ defineProps<{
   font-size: 12.5px;
   color: var(--brown);
   line-height: 1.9;
+  white-space: pre-line;
 }
 </style>

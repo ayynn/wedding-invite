@@ -70,12 +70,11 @@ defineProps<{
   z-index: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 50% 28%;
+  object-fit: contain;
+  object-position: center;
   pointer-events: none;
   user-select: none;
   filter: saturate(0.92) contrast(1.02) brightness(1.04);
-  transform: scale(1.04);
 }
 .finale-shade {
   position: absolute;

@@ -1,148 +1,195 @@
 <script setup lang="ts">
-defineOptions({ name: 'rsvp-section' })
+defineOptions({ name: 'rsvp-section' });
 
-import { computed, inject, reactive, ref, type Ref } from 'vue'
-import { lookupRsvpByName, submitRsvp, type RsvpRecord } from '@/api/client'
-import type { RsvpPayload } from '@/types'
-import SectionTitle from './SectionTitle.vue'
-import ShareInviteButton from './ShareInviteButton.vue'
-import ExportLongImageButton from './ExportLongImageButton.vue'
+import { computed, inject, reactive, ref, type Ref } from 'vue';
+import { lookupRsvpByName, submitRsvp, type RsvpRecord } from '@/api/client';
+import type { RsvpPayload } from '@/types';
+import SectionTitle from './SectionTitle.vue';
+import ShareInviteButton from './ShareInviteButton.vue';
+import ExportLongImageButton from './ExportLongImageButton.vue';
 
 const exportInvite = inject<{
-  exporting: Ref<boolean>
-  exportImage: () => Promise<void>
-}>('exportInviteImage')
+  exporting: Ref<boolean>;
+  exportImage: () => Promise<void>;
+}>('exportInviteImage');
 
-const exportBusy = computed(() => !!exportInvite?.exporting.value)
+const exportBusy = computed(() => !!exportInvite?.exporting.value);
 
 function onExportLongImage(): void {
-  void exportInvite?.exportImage()
+  void exportInvite?.exportImage();
 }
 
 const props = defineProps<{
-  endpoint: string
-}>()
+  endpoint: string;
+}>();
 
 const form = reactive({
   name: '',
   phone: '',
   num: '',
   attend: 'yes' as RsvpPayload['attend'],
-  msg: ''
-})
-const submitted = ref(false)
-const submitting = ref(false)
-const submitError = ref('')
-const duplicateMatches = ref<RsvpRecord[]>([])
-const showDuplicateConfirm = ref(false)
+  msg: '',
+});
+const submitted = ref(false);
+const submitting = ref(false);
+const submitError = ref('');
+const duplicateMatches = ref<RsvpRecord[]>([]);
+const showDuplicateConfirm = ref(false);
 /** 已确认「不是同一人」的姓名；换名后需重新检查 */
-const confirmedNotSameName = ref('')
+const confirmedNotSameName = ref('');
 
 function formatTime(time?: string): string {
-  if (!time) return '—'
-  return time.slice(0, 19).replace('T', ' ')
+  if (!time) return '—';
+  return time.slice(0, 19).replace('T', ' ');
 }
 
 async function doSubmit(): Promise<void> {
-  submitting.value = true
-  submitError.value = ''
+  submitting.value = true;
+  submitError.value = '';
   const payload: RsvpPayload = {
     name: form.name.trim(),
     phone: form.phone.trim(),
     num: form.num.trim(),
     attend: form.attend,
     msg: form.msg.trim(),
-    time: new Date().toISOString()
-  }
+    time: new Date().toISOString(),
+  };
   try {
-    await submitRsvp(props.endpoint, payload)
-    submitted.value = true
-    showDuplicateConfirm.value = false
-    duplicateMatches.value = []
-    confirmedNotSameName.value = ''
+    await submitRsvp(props.endpoint, payload);
+    submitted.value = true;
+    showDuplicateConfirm.value = false;
+    duplicateMatches.value = [];
+    confirmedNotSameName.value = '';
   } catch (err) {
-    submitError.value = '提交失败，请稍后重试'
-    console.warn('[RSVP] 上传失败:', err)
+    submitError.value = '提交失败，请稍后重试';
+    console.warn('[RSVP] 上传失败:', err);
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
 }
 
 async function onSubmit(e: Event): Promise<void> {
-  e.preventDefault()
+  e.preventDefault();
   if (!form.name.trim()) {
-    ;(document.getElementById('rsvpName') as HTMLInputElement | null)?.focus()
-    return
+    (document.getElementById('rsvpName') as HTMLInputElement | null)?.focus();
+    return;
   }
   if (!props.endpoint) {
-    submitError.value = '登记服务暂不可用'
-    return
+    submitError.value = '登记服务暂不可用';
+    return;
   }
 
-  const name = form.name.trim()
-  submitting.value = true
-  submitError.value = ''
+  const name = form.name.trim();
+  submitting.value = true;
+  submitError.value = '';
   try {
     if (confirmedNotSameName.value !== name) {
-      const matches = await lookupRsvpByName(props.endpoint, name)
+      const matches = await lookupRsvpByName(props.endpoint, name);
       if (matches.length) {
-        duplicateMatches.value = matches
-        showDuplicateConfirm.value = true
-        submitting.value = false
-        return
+        duplicateMatches.value = matches;
+        showDuplicateConfirm.value = true;
+        submitting.value = false;
+        return;
       }
     }
-    await doSubmit()
+    await doSubmit();
   } catch (err) {
-    submitError.value = '提交失败，请稍后重试'
-    console.warn('[RSVP] 同名检查失败:', err)
-    submitting.value = false
+    submitError.value = '提交失败，请稍后重试';
+    console.warn('[RSVP] 同名检查失败:', err);
+    submitting.value = false;
   }
 }
 
 function cancelDuplicate(): void {
-  showDuplicateConfirm.value = false
-  duplicateMatches.value = []
-  confirmedNotSameName.value = ''
+  showDuplicateConfirm.value = false;
+  duplicateMatches.value = [];
+  confirmedNotSameName.value = '';
 }
 
 async function confirmNotSameAndSubmit(): Promise<void> {
-  confirmedNotSameName.value = form.name.trim()
-  showDuplicateConfirm.value = false
-  await doSubmit()
+  confirmedNotSameName.value = form.name.trim();
+  showDuplicateConfirm.value = false;
+  await doSubmit();
 }
 </script>
 
 <template>
   <section class="section rsvp">
     <div class="wrap">
-      <SectionTitle en="RSVP" cn="好久不见，婚礼见" />
+      <SectionTitle
+        en="RSVP"
+        cn="好久不见，婚礼见"
+      />
       <div class="rsvp-lead reveal">
         <p class="rsvp-en">
           Thank you for your love and support along the way.<br />
           Long time no see. See you soon!
         </p>
         <p class="rsvp-zh">
-          我们一路成长，感恩和你相逢，幸得相伴与支持。<br />
-          好久不见，婚礼见
+          我们一路成长，感恩所有相遇 <br />
+          承蒙支持相伴，好久不见，婚礼见！ <br />
         </p>
       </div>
-      <form v-if="!submitted" class="form reveal d1" @submit="onSubmit">
+      <form
+        v-if="!submitted"
+        class="form reveal d1"
+        @submit="onSubmit"
+      >
         <div class="row">
-          <input id="rsvpName" v-model="form.name" type="text" placeholder="您的姓名 *" required />
-          <input v-model="form.phone" type="tel" placeholder="联系电话" />
+          <input
+            id="rsvpName"
+            v-model="form.name"
+            type="text"
+            placeholder="您的姓名 *"
+            required
+          />
+          <input
+            v-model="form.phone"
+            type="tel"
+            placeholder="联系电话"
+          />
         </div>
-        <input v-model="form.num" type="text" placeholder="同行人数（含本人）" inputmode="numeric" />
+        <input
+          v-model="form.num"
+          type="text"
+          placeholder="同行人数（含本人）"
+          inputmode="numeric"
+        />
         <div class="radio-group">
-          <input id="attend-yes" v-model="form.attend" type="radio" name="attend" value="yes" />
+          <input
+            id="attend-yes"
+            v-model="form.attend"
+            type="radio"
+            name="attend"
+            value="yes"
+          />
           <label for="attend-yes">✦ 赴约相聚</label>
-          <input id="attend-no" v-model="form.attend" type="radio" name="attend" value="no" />
+          <input
+            id="attend-no"
+            v-model="form.attend"
+            type="radio"
+            name="attend"
+            value="no"
+          />
           <label for="attend-no">✕ 遗憾缺席</label>
         </div>
-        <textarea v-model="form.msg" rows="3" placeholder="写下您的祝福…"></textarea>
-        <p v-if="submitError" class="form-err">{{ submitError }}</p>
-        <button class="submit" type="submit" :disabled="submitting">
-          {{ submitting ? '提交中…' : '✦ 留言备注 ✦' }}
+        <textarea
+          v-model="form.msg"
+          rows="3"
+          placeholder="备注信息..."
+        ></textarea>
+        <p
+          v-if="submitError"
+          class="form-err"
+        >
+          {{ submitError }}
+        </p>
+        <button
+          class="submit"
+          type="submit"
+          :disabled="submitting"
+        >
+          {{ submitting ? '提交中…' : '提交' }}
         </button>
         <ShareInviteButton />
         <ExportLongImageButton
@@ -151,10 +198,26 @@ async function confirmNotSameAndSubmit(): Promise<void> {
           @export="onExportLongImage"
         />
       </form>
-      <div v-else class="form-ok">
+      <div
+        v-else
+        class="form-ok"
+      >
         <div class="ok-ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="3" width="20" height="18" rx="2" />
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect
+              x="2"
+              y="3"
+              width="20"
+              height="18"
+              rx="2"
+            />
             <polyline points="2 7 12 14 22 7" />
           </svg>
         </div>
@@ -171,30 +234,64 @@ async function confirmNotSameAndSubmit(): Promise<void> {
       </div>
     </div>
 
-    <div v-if="showDuplicateConfirm" class="dup-mask" @click.self="cancelDuplicate">
-      <div class="dup-panel" role="dialog" aria-modal="true" aria-labelledby="dup-title">
+    <div
+      v-if="showDuplicateConfirm"
+      class="dup-mask"
+      @click.self="cancelDuplicate"
+    >
+      <div
+        class="dup-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dup-title"
+      >
         <h3 id="dup-title">发现同名登记</h3>
         <p class="dup-lead">
-          已有姓名为「{{ form.name.trim() }}」的登记记录。请确认是否为您本人；若不是同一人，可继续登记。
+          已有姓名为「{{
+            form.name.trim()
+          }}」的登记记录。请确认是否为您本人；若不是同一人，可继续登记。
         </p>
         <ul class="dup-list">
-          <li v-for="(item, idx) in duplicateMatches" :key="item.id || idx">
-            <div class="dup-row"><span>姓名</span><b>{{ item.name }}</b></div>
-            <div class="dup-row"><span>电话</span><b>{{ item.phone || '—' }}</b></div>
-            <div class="dup-row"><span>人数</span><b>{{ item.num || '—' }}</b></div>
+          <li
+            v-for="(item, idx) in duplicateMatches"
+            :key="item.id || idx"
+          >
+            <div class="dup-row">
+              <span>姓名</span><b>{{ item.name }}</b>
+            </div>
+            <div class="dup-row">
+              <span>电话</span><b>{{ item.phone || '—' }}</b>
+            </div>
+            <div class="dup-row">
+              <span>人数</span><b>{{ item.num || '—' }}</b>
+            </div>
             <div class="dup-row">
               <span>赴约</span>
               <b>{{ item.attend === 'no' ? '遗憾缺席' : '赴约相聚' }}</b>
             </div>
-            <div class="dup-row"><span>留言</span><b>{{ item.msg || '—' }}</b></div>
-            <div class="dup-row"><span>时间</span><b>{{ formatTime(item.time) }}</b></div>
+            <div class="dup-row">
+              <span>留言</span><b>{{ item.msg || '—' }}</b>
+            </div>
+            <div class="dup-row">
+              <span>时间</span><b>{{ formatTime(item.time) }}</b>
+            </div>
           </li>
         </ul>
         <div class="dup-actions">
-          <button type="button" class="ghost" :disabled="submitting" @click="cancelDuplicate">
+          <button
+            type="button"
+            class="ghost"
+            :disabled="submitting"
+            @click="cancelDuplicate"
+          >
             这是我，取消
           </button>
-          <button type="button" class="primary" :disabled="submitting" @click="confirmNotSameAndSubmit">
+          <button
+            type="button"
+            class="primary"
+            :disabled="submitting"
+            @click="confirmNotSameAndSubmit"
+          >
             {{ submitting ? '提交中…' : '不是我，继续登记' }}
           </button>
         </div>

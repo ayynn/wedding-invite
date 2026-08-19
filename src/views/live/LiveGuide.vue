@@ -228,6 +228,7 @@ const config = weddingConfig
   font-size: 12px;
   line-height: 1.65;
   color: var(--brown);
+  white-space: pre-line;
 }
 
 @keyframes riseIn {

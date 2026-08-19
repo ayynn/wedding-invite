@@ -1,22 +1,35 @@
 <script setup lang="ts">
-import type { ScheduleItem } from '@/types'
-import SectionTitle from './SectionTitle.vue'
+import type { ScheduleItem } from '@/types';
+import SectionTitle from './SectionTitle.vue';
 
 defineProps<{
-  items: ScheduleItem[]
-}>()
+  items: ScheduleItem[];
+}>();
 </script>
 
 <template>
   <section class="section schedule">
     <div class="wrap">
-      <SectionTitle en="Schedule" cn="婚礼流程 · Wedding Schedule" />
+      <SectionTitle
+        en="Wedding Schedule"
+        cn="婚礼流程"
+      />
       <div class="timeline">
-        <div v-for="(item, i) in items" :key="item.time" class="t-item reveal" :class="i % 2 === 0 ? 'd0' : 'd1'">
+        <div
+          v-for="(item, i) in items"
+          :key="item.time"
+          class="t-item reveal"
+          :class="i % 2 === 0 ? 'd0' : 'd1'"
+        >
           <div class="t-dot"></div>
           <div class="t-time">{{ item.time }}</div>
           <div class="t-title">{{ item.title }}</div>
-          <div v-if="item.desc" class="t-desc">{{ item.desc }}</div>
+          <div
+            v-if="item.desc"
+            class="t-desc"
+          >
+            {{ item.desc }}
+          </div>
         </div>
       </div>
     </div>
@@ -36,7 +49,13 @@ defineProps<{
   top: 0;
   bottom: 0;
   width: 1px;
-  background: linear-gradient(180deg, transparent, var(--gold) 12%, var(--gold) 88%, transparent);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--gold) 12%,
+    var(--gold) 88%,
+    transparent
+  );
 }
 .t-item {
   position: relative;
@@ -58,7 +77,9 @@ defineProps<{
   height: 12px;
   border-radius: 50%;
   background: var(--gold);
-  box-shadow: 0 0 0 4px rgba(201, 168, 106, 0.16), 0 0 16px rgba(201, 168, 106, 0.2);
+  box-shadow:
+    0 0 0 4px rgba(201, 168, 106, 0.16),
+    0 0 16px rgba(201, 168, 106, 0.2);
   z-index: 2;
   animation: dotPulse 3s ease-in-out infinite;
 }
@@ -69,11 +90,16 @@ defineProps<{
   left: -7px;
 }
 @keyframes dotPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 4px rgba(201, 168, 106, 0.16), 0 0 16px rgba(201, 168, 106, 0.2);
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px rgba(201, 168, 106, 0.16),
+      0 0 16px rgba(201, 168, 106, 0.2);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(201, 168, 106, 0.08), 0 0 22px rgba(201, 168, 106, 0.3);
+    box-shadow:
+      0 0 0 8px rgba(201, 168, 106, 0.08),
+      0 0 22px rgba(201, 168, 106, 0.3);
   }
 }
 .t-time {

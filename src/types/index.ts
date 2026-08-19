@@ -59,7 +59,7 @@ export interface PortraitStory {
   en: string;
   cn: string;
   sub: string;
-  caption: string;
+  caption?: string;
 }
 
 /** 婚礼行程项 */

@@ -7,7 +7,7 @@ withDefaults(
     en: string;
     cn: string;
     sub: string;
-    caption: string;
+    caption?: string;
     /** formal 居中端正；art 偏移错落 */
     variant?: 'formal' | 'art';
     /** 深色底：艺术合照用墨蓝，衬托白色礼服 */
@@ -47,7 +47,7 @@ withDefaults(
           :alt="cn"
           loading="lazy"
         />
-        <figcaption>{{ caption }}</figcaption>
+        <figcaption v-if="caption">{{ caption }}</figcaption>
       </figure>
     </div>
   </section>

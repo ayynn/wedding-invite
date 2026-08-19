@@ -51,7 +51,7 @@ onUnmounted(() => {
 <template>
   <section class="section gallery">
     <div class="wrap">
-      <SectionTitle en="The Venue" cn="爱在 · 阿丽那野奢庄园" sub="上海浦东新区笋王路168号 · 隐于森林的梦中庄园" />
+      <SectionTitle en="The Venue" cn="爱在 · 阿丽那野奢庄园" sub="上海浦东新区笋王路168号" />
       <div class="gallery-grid">
         <div
           v-for="(item, i) in items"
@@ -69,7 +69,6 @@ onUnmounted(() => {
             @error="onImgError(i)"
           />
           <div v-else class="img-err">❦</div>
-          <div class="cap">{{ item.caption }}</div>
         </div>
       </div>
       <p class="sec-sub reveal d1" style="margin-top: 30px">— 轻触图片可查看大图 —</p>
@@ -81,7 +80,6 @@ onUnmounted(() => {
         <button class="lb-x" @click="closeLightbox">✕</button>
         <img v-if="!imgFailed" :src="items[activeIndex].src" :alt="items[activeIndex].caption" @error="imgFailed = true" />
         <div v-else class="lb-err">❦<br />图片加载失败</div>
-        <div class="lb-cap">{{ items[activeIndex].caption }}</div>
         <button class="lb-prev" @click.stop="step(-1)">‹</button>
         <button class="lb-next" @click.stop="step(1)">›</button>
       </div>
@@ -117,33 +115,6 @@ onUnmounted(() => {
 .g-item:hover img {
   transform: scale(1.09);
   filter: brightness(1.05);
-}
-.g-item::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 55%, rgba(92, 83, 72, 0.38));
-  opacity: 0;
-  transition: 0.5s;
-}
-.g-item:hover::after {
-  opacity: 1;
-}
-.cap {
-  position: absolute;
-  left: 16px;
-  bottom: 12px;
-  z-index: 2;
-  color: var(--ivory);
-  font-size: 13px;
-  letter-spacing: 0.18em;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: 0.5s;
-}
-.g-item:hover .cap {
-  opacity: 1;
-  transform: none;
 }
 .g-1 {
   grid-column: span 8;
@@ -190,11 +161,6 @@ onUnmounted(() => {
   font-size: 40px;
   text-align: center;
   line-height: 1.8;
-}
-.lb-cap {
-  color: var(--gold-light);
-  font-size: 14px;
-  letter-spacing: 0.24em;
 }
 .lb-x {
   position: absolute;

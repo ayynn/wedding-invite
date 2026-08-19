@@ -23,7 +23,7 @@ function loveLineClass(line: string): string {
     <span class="tint tint-b" aria-hidden="true"></span>
 
     <div class="wrap">
-      <SectionTitle en="Beloved Couple" cn="新人 · 情定于此" />
+      <SectionTitle en="Beloved Couple" cn="幸得相逢·步步与共" />
 
       <figure class="portrait reveal">
         <span class="portrait-frame" aria-hidden="true"></span>

@@ -1,20 +1,23 @@
 <script setup lang="ts">
-import { useCountdown } from '@/composables/useCountdown'
-import SectionTitle from './SectionTitle.vue'
+import { useCountdown } from '@/composables/useCountdown';
+import SectionTitle from './SectionTitle.vue';
 
 const props = defineProps<{
-  target: string
-  dateText: string
-  dateSubText: string
-}>()
+  target: string;
+  dateText: string;
+  dateSubText: string;
+}>();
 
-const { days, hours, minutes, seconds, expired } = useCountdown(props.target)
+const { days, hours, minutes, seconds, expired } = useCountdown(props.target);
 </script>
 
 <template>
   <section class="section countdown-sec">
     <div class="wrap">
-      <SectionTitle en="Save the Date" cn="距婚礼还有" />
+      <SectionTitle
+        en="Save the Date"
+        cn="距婚礼还有"
+      />
       <div class="countdown-box reveal">
         <div class="cd-item">
           <div class="num">{{ days }}</div>
@@ -33,7 +36,9 @@ const { days, hours, minutes, seconds, expired } = useCountdown(props.target)
           <div class="lab">秒</div>
         </div>
       </div>
-      <div class="cd-note reveal d1">{{ expired ? '今天就是我们的大喜之日 ♥' : dateSubText }}</div>
+      <div class="cd-note reveal d1">
+        {{ expired ? '今天就是我们的大喜之日 ♥' : dateSubText }}
+      </div>
     </div>
   </section>
 </template>
@@ -49,12 +54,11 @@ const { days, hours, minutes, seconds, expired } = useCountdown(props.target)
 .countdown-box {
   display: flex;
   justify-content: center;
-  gap: clamp(10px, 3vw, 30px);
   margin-top: 40px;
   flex-wrap: wrap;
 }
 .cd-item {
-  min-width: 86px;
+  min-width: 66px;
   text-align: center;
 }
 .num {
