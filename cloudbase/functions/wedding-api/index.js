@@ -44,6 +44,13 @@ function notFound() {
   }
 }
 
+/** CloudBase / Mongo 文档不能通过 set/update 改写 _id */
+function withoutDocId(doc) {
+  if (!doc || typeof doc !== 'object') return {}
+  const { _id, ...rest } = doc
+  return rest
+}
+
 function getPath(event) {
   const raw =
     event.path ||
@@ -241,7 +248,7 @@ async function likeWall(db, id) {
   const prev = Array.isArray(data) ? data[0] : data
   if (!prev) return json({ ok: false, error: '记录不存在' }, 404)
   const likes = Math.max(0, Number(prev.likes) || 0) + 1
-  await db.collection('wall').doc(id).set({ ...prev, id, likes })
+  await db.collection('wall').doc(id).update({ likes })
   return json({ ok: true, id, likes })
 }
 
@@ -255,7 +262,7 @@ async function updateWall(app, db, id, body) {
   if (!nextName) return json({ ok: false, error: '缺少昵称' }, 400)
 
   const meta = {
-    ...prev,
+    ...withoutDocId(prev),
     id,
     name: nextName,
     caption:

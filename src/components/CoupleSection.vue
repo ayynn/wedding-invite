@@ -53,6 +53,9 @@ function loveLineClass(line: string): string {
           <br v-if="i < loveStory.length - 1" />
         </template>
       </p>
+      <p class="love-source reveal d2">
+        — — “And The Winner Is” · Gérard Darmon
+      </p>
     </div>
   </section>
 </template>
@@ -184,6 +187,16 @@ function loveLineClass(line: string): string {
 .love-zh {
   font-family: var(--font-serif);
   letter-spacing: 0.08em;
+}
+.love-source {
+  margin: 18px auto 0;
+  max-width: 640px;
+  text-align: center;
+  font-family: var(--font-display-en);
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: rgba(92, 83, 72, 0.58);
 }
 
 @media (max-width: 640px) {

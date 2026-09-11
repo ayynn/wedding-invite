@@ -104,12 +104,6 @@ onUnmounted(() => glowCleanup?.())
       <RsvpSection class="no-export" :endpoint="config.api.rsvpEndpoint" />
       <ScheduleSection :items="config.schedule" />
       <GallerySection :items="config.gallery" />
-      <PortraitStorySection
-        :src="config.portraits.art"
-        v-bind="config.portraitStories.art"
-        variant="art"
-        tone="light"
-      />
       <TipsSection :items="config.tips" :venue="config.venue" />
       <FinaleSection
         :logo-parts="config.couple.logoParts"

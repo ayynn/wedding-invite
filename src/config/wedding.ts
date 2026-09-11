@@ -76,7 +76,6 @@ export const weddingConfig: WeddingConfig = {
     groom: '/imgs/portrait/groom.jpg',
     bride: '/imgs/portrait/bride.jpg',
     formal: '/imgs/portrait/couple-formal.jpg',
-    art: '/imgs/portrait/couple-art.jpg',
     finale: '/imgs/portrait/couple-finale.jpg',
   },
 
@@ -85,12 +84,6 @@ export const weddingConfig: WeddingConfig = {
       en: 'Till here, and for beyond',
       cn: '相逢此时，漫漫与共',
       sub: '在这场奇妙漫长的人生盛典，我获颁与你并肩的一生。',
-    },
-    art: {
-      en: 'Quiet Moments',
-      cn: '静好时光',
-      sub: '依偎之间，是我们最自在的模样',
-      caption: '白色影棚 · 依偎静好',
     },
   },
 
@@ -184,11 +177,11 @@ export const weddingConfig: WeddingConfig = {
    * 页面已打开后由 JS 定制分享卡需公众号 JS-SDK，本项目未接入。
    */
   share: {
-    url: 'https://wedding-invite-d9gdvtmrr73ff6b75-1461874135.ap-shanghai.app.tcloudbase.com',
+    url: 'https://wjgmywedding.cn',
     title: 'GMY & WJ · 我们结婚啦',
     text: '吴极 & 高旻洋 婚礼邀请 · 2026.10.18 · 上海阿丽那野奢度假庄园',
-    /** 运行 pnpm share:qr 可重新生成 public/share/og-cover.png */
-    image: '/share/og-cover.png',
+    /** 运行 pnpm share:qr 可重新生成 public/share/og-cover.jpg */
+    image: '/share/og-cover.jpg',
     qrImage: '/share/invite-card.png',
   },
 };

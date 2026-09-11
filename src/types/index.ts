@@ -48,8 +48,6 @@ export interface PortraitAssets {
   bride: string;
   /** 端正合照（白底全身） */
   formal: string;
-  /** 艺术合照（白底情绪） */
-  art: string;
   /** 尾页大图 */
   finale: string;
 }
@@ -141,10 +139,9 @@ export interface WeddingConfig {
   loveStory: string[];
   /** 婚纱照素材路径 */
   portraits: PortraitAssets;
-  /** 端正合照 / 艺术合照文案 */
+  /** 合照文案 */
   portraitStories: {
     formal: PortraitStory;
-    art: PortraitStory;
   };
   gallery: GalleryItem[];
   schedule: ScheduleItem[];

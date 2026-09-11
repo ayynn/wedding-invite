@@ -97,6 +97,7 @@ defineProps<{
   position: relative;
   z-index: 2;
   padding: 0 24px 72px;
+  transform: translateY(-7vh);
 }
 .fv {
   font-family: var(--font-script);
@@ -106,6 +107,19 @@ defineProps<{
   display: inline-block;
   padding: 0.15em 0.35em;
   animation: fvGlow 4s ease-in-out infinite;
+  background: linear-gradient(
+    135deg,
+    #e8d9c0 0%,
+    #c9b18f 28%,
+    #9a8162 52%,
+    #d2c0a2 74%,
+    #856b4d 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 3px 14px rgba(133, 107, 77, 0.32));
 }
 .fv .amp {
   font-size: 0.55em;

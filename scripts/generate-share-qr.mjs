@@ -14,7 +14,7 @@ const OUT_DIR = path.join(ROOT, 'public', 'share')
 
 const URL =
   process.env.SHARE_URL ||
-  'https://wedding-invite-d9gdvtmrr73ff6b75-1461874135.ap-shanghai.app.tcloudbase.com'
+  'https://wjgmywedding.cn'
 
 const W = 750
 const H = 1100
@@ -225,48 +225,23 @@ async function verifyScan(pngPath) {
 
 /**
  * 微信 / OG 分享缩略图（约 1:1）。
- * WeChat 抓取链接预览时读页面 meta 的 og:image，需为可公网访问的绝对 HTTPS 地址。
+ * 微信爬虫对 PNG / 大图很敏感，超过约 300KB 时常抓不到图，卡片会退化成纯链接。
+ * 输出小体积 JPEG，便于「发送给朋友」展开标题 + 封面。
  */
-async function buildOgCoverPng() {
-  const SIZE = 800
+async function buildOgCoverJpg() {
+  const SIZE = 500
+  const portraitPath = path.join(ROOT, 'public', 'imgs', 'portrait', 'og-share.jpg')
   const venuePath = path.join(ROOT, 'public', 'imgs', 'venue_01.jpg')
-  if (!fs.existsSync(venuePath)) {
-    throw new Error(`缺少封面底图: ${venuePath}`)
+  const srcPath = fs.existsSync(portraitPath) ? portraitPath : venuePath
+  if (!fs.existsSync(srcPath)) {
+    throw new Error(`缺少分享封面底图: ${srcPath}`)
   }
 
-  const bg = await sharp(venuePath)
+  const outPath = path.join(OUT_DIR, 'og-cover.jpg')
+  await sharp(srcPath)
+    .rotate()
     .resize(SIZE, SIZE, { fit: 'cover', position: 'centre' })
-    .jpeg({ quality: 90 })
-    .toBuffer()
-
-  const overlaySvg = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">
-  <defs>
-    <linearGradient id="veil" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0f1a14" stop-opacity="0.15"/>
-      <stop offset="45%" stop-color="#0f1a14" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#0f1a14" stop-opacity="0.82"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fdf3d3"/>
-      <stop offset="45%" stop-color="#e8c98a"/>
-      <stop offset="100%" stop-color="#c9a86a"/>
-    </linearGradient>
-  </defs>
-  <rect width="${SIZE}" height="${SIZE}" fill="url(#veil)"/>
-  <g fill="url(#gold)">
-    <path d="M400 528c14 17 32 28 54 33 -22 5-40 16-54 33 -14-17-32-28-54-33 22-5 40-16 54-33z" opacity="0.95"/>
-  </g>
-  <text x="400" y="590" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-style="italic" fill="#e8c98a">GMY &amp; WJ</text>
-  <text x="400" y="648" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif" font-size="40" font-weight="600" fill="#faf6ee">吴极 · 高旻洋</text>
-  <text x="400" y="698" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif" font-size="22" letter-spacing="4" fill="#e8d5a3">2026 · 10 · 18</text>
-  <text x="400" y="740" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif" font-size="18" fill="#c9b89a">上海 · 阿丽那野奢度假庄园</text>
-</svg>`)
-
-  const outPath = path.join(OUT_DIR, 'og-cover.png')
-  await sharp(bg)
-    .composite([{ input: await sharp(overlaySvg).png().toBuffer() }])
-    .png({ quality: 90, compressionLevel: 8 })
+    .jpeg({ quality: 82, mozjpeg: true })
     .toFile(outPath)
   return outPath
 }
@@ -274,7 +249,7 @@ async function buildOgCoverPng() {
 async function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true })
 
-  const ogPath = await buildOgCoverPng()
+  const ogPath = await buildOgCoverJpg()
   console.log(`[share-qr] OG  → ${ogPath}`)
 
   const qrSize = 396

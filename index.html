@@ -11,19 +11,22 @@
     页面内用 JS 改写分享卡需公众号 appId + wx.config，本项目未接入。
   -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://wedding-invite-d9gdvtmrr73ff6b75-1461874135.ap-shanghai.app.tcloudbase.com">
+  <meta property="og:site_name" content="GMY &amp; WJ">
+  <meta property="og:url" content="https://wjgmywedding.cn/">
   <meta property="og:title" content="GMY &amp; WJ · 我们结婚啦">
   <meta property="og:description" content="吴极 &amp; 高旻洋 婚礼邀请 · 2026.10.18 · 上海阿丽那野奢度假庄园">
-  <meta property="og:image" content="https://wedding-invite-d9gdvtmrr73ff6b75-1461874135.ap-shanghai.app.tcloudbase.com/share/og-cover.png">
-  <meta property="og:image:width" content="800">
-  <meta property="og:image:height" content="800">
+  <meta property="og:image" content="https://wjgmywedding.cn/share/og-cover.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="500">
+  <meta property="og:image:height" content="500">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="GMY &amp; WJ · 我们结婚啦">
   <meta name="twitter:description" content="吴极 &amp; 高旻洋 婚礼邀请 · 2026.10.18 · 上海阿丽那野奢度假庄园">
-  <meta name="twitter:image" content="https://wedding-invite-d9gdvtmrr73ff6b75-1461874135.ap-shanghai.app.tcloudbase.com/share/og-cover.png">
+  <meta name="twitter:image" content="https://wjgmywedding.cn/share/og-cover.jpg">
   <meta itemprop="name" content="GMY &amp; WJ · 我们结婚啦">
   <meta itemprop="description" content="吴极 &amp; 高旻洋 婚礼邀请 · 2026.10.18 · 上海阿丽那野奢度假庄园">
-  <meta itemprop="image" content="https://wedding-invite-d9gdvtmrr73ff6b75-1461874135.ap-shanghai.app.tcloudbase.com/share/og-cover.png">
+  <meta itemprop="image" content="https://wjgmywedding.cn/share/og-cover.jpg">
+  <link rel="image_src" href="https://wjgmywedding.cn/share/og-cover.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -32,6 +35,14 @@
   <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/lxgwwenkai-regular.css" rel="stylesheet">
 </head>
 <body>
+  <!-- 微信爬虫会取页面里的首图；勿用 display:none，否则抓不到 -->
+  <img
+    src="https://wjgmywedding.cn/share/og-cover.jpg"
+    alt="GMY &amp; WJ · 我们结婚啦"
+    width="500"
+    height="500"
+    style="position:absolute;left:-9999px;width:500px;height:500px"
+  >
   <div id="app"></div>
   <script type="module" src="/src/main.ts"></script>
 </body>

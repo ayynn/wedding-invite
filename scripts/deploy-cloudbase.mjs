@@ -205,10 +205,15 @@ const gateway = gatewayPrefix
   ? `https://${gatewayPrefix}.ap-shanghai.app.tcloudbase.com`
   : `https://${envId}.ap-shanghai.app.tcloudbase.com`
 
+const siteUrl = 'https://wjgmywedding.cn'
+
 console.log(`
 [deploy:cloudbase] 部署完成
 
-统一默认域名（静态 + API，推荐）:
+正式域名（静态 + API）:
+  ${siteUrl}
+
+统一默认域名（静态 + API）:
   ${gateway}
 
 静态托管域名（仅前端，相对路径 API 不可用）:

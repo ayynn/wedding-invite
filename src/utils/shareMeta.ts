@@ -41,12 +41,14 @@ export function applyShareMeta(): void {
 
   upsertMeta('name', 'description', share.text)
   upsertMeta('property', 'og:type', 'website')
-  upsertMeta('property', 'og:url', url)
+  upsertMeta('property', 'og:site_name', 'GMY & WJ')
+  upsertMeta('property', 'og:url', url.endsWith('/') ? url : `${url}/`)
   upsertMeta('property', 'og:title', share.title)
   upsertMeta('property', 'og:description', share.text)
   upsertMeta('property', 'og:image', image)
-  upsertMeta('property', 'og:image:width', '800')
-  upsertMeta('property', 'og:image:height', '800')
+  upsertMeta('property', 'og:image:type', 'image/jpeg')
+  upsertMeta('property', 'og:image:width', '500')
+  upsertMeta('property', 'og:image:height', '500')
   upsertMeta('name', 'twitter:card', 'summary_large_image')
   upsertMeta('name', 'twitter:title', share.title)
   upsertMeta('name', 'twitter:description', share.text)
@@ -54,4 +56,12 @@ export function applyShareMeta(): void {
   upsertMeta('itemprop', 'name', share.title)
   upsertMeta('itemprop', 'description', share.text)
   upsertMeta('itemprop', 'image', image)
+
+  let imageSrc = document.head.querySelector('link[rel="image_src"]')
+  if (!imageSrc) {
+    imageSrc = document.createElement('link')
+    imageSrc.setAttribute('rel', 'image_src')
+    document.head.appendChild(imageSrc)
+  }
+  imageSrc.setAttribute('href', image)
 }
