@@ -105,7 +105,7 @@ export const weddingConfig: WeddingConfig = {
     },
     {
       time: '16:18',
-      title: '草坪仪式 · Ceremony',
+      title: '水台仪式 · Ceremony',
     },
     {
       time: '16:58',
