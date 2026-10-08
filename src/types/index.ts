@@ -85,6 +85,9 @@ export interface RsvpPayload {
   time: string;
 }
 
+/** 相册分区：活动照片墙 / 婚纱照鉴赏 */
+export type WallAlbum = 'wall' | 'portrait';
+
 /** 图片墙上传负载 */
 export interface WallUploadPayload {
   name: string;
@@ -94,6 +97,8 @@ export interface WallUploadPayload {
   /** 压缩后图片宽高（PhotoSwipe 预览用） */
   width: number;
   height: number;
+  /** 分区，默认 wall（宾客活动照） */
+  album?: WallAlbum;
 }
 
 /** 图片墙条目（后端返回） */
@@ -108,6 +113,8 @@ export interface WallItem {
   height: number;
   /** 点赞数 */
   likes: number;
+  /** 分区 */
+  album?: WallAlbum;
   createdAt: string;
 }
 
@@ -177,6 +184,12 @@ export interface WeddingConfig {
     maxSize: number;
     /** 单张图片最大体积（字节，超出提示） */
     maxBytes: number;
+  };
+  /** 婚纱照鉴赏相册文案 */
+  portraitsAlbum: {
+    title: string;
+    en: string;
+    sub: string;
   };
   /** 分享给朋友 */
   share: {

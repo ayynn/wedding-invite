@@ -1,4 +1,4 @@
-import type { RsvpPayload, WallItem, WallUploadPayload } from '@/types'
+import type { RsvpPayload, WallAlbum, WallItem, WallUploadPayload } from '@/types'
 
 export type RsvpRecord = RsvpPayload & { id?: string }
 
@@ -71,9 +71,13 @@ export async function deleteRsvpBatch(endpoint: string, ids: string[]): Promise<
   await Promise.all(ids.map((id) => deleteRsvp(endpoint, id)))
 }
 
-/** 获取图片墙列表 */
-export async function fetchWall(endpoint: string): Promise<WallItem[]> {
-  return jsonRequest<WallItem[]>(endpoint)
+/** 获取图片墙列表（album: wall | portrait | all） */
+export async function fetchWall(
+  endpoint: string,
+  album: WallAlbum | 'all' = 'wall'
+): Promise<WallItem[]> {
+  const url = `${endpoint}?album=${encodeURIComponent(album)}`
+  return jsonRequest<WallItem[]>(url)
 }
 
 /**

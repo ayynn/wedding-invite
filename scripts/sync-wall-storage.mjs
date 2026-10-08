@@ -142,6 +142,7 @@ async function main() {
       width: DEFAULT_W,
       height: DEFAULT_H,
       likes: 0,
+      album: 'portrait',
       mime: mimeFromExt(extname(cloudPath)),
       fileID: toFileId(cloudPath),
       cloudPath,

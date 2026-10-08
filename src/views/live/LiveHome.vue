@@ -26,6 +26,15 @@ const features: LiveFeature[] = [
     accent: '#2d4a36'
   },
   {
+    key: 'portraits',
+    routeName: 'live-portraits',
+    title: '婚纱照鉴赏',
+    en: 'Portraits',
+    desc: '新郎新娘婚纱照精选',
+    ready: true,
+    accent: '#a67c52'
+  },
+  {
     key: 'guide',
     routeName: 'live-guide',
     title: '当天指引',
@@ -33,15 +42,6 @@ const features: LiveFeature[] = [
     desc: '流程、场地与温馨提示',
     ready: true,
     accent: '#8a7350'
-  },
-  {
-    key: 'portraits',
-    routeName: 'live-portraits',
-    title: '婚纱照鉴赏',
-    en: 'Portraits',
-    desc: '新郎新娘婚纱照精选',
-    ready: false,
-    accent: '#a67c52'
   },
   {
     key: 'lottery',
@@ -60,15 +60,6 @@ const features: LiveFeature[] = [
     desc: '轻松互动，热闹加分',
     ready: false,
     accent: '#4a6b52'
-  },
-  {
-    key: 'moments',
-    routeName: 'live-moments',
-    title: '实时瞬间',
-    en: 'Live Moments',
-    desc: '节日现场实时上传鉴赏',
-    ready: false,
-    accent: '#c9a86a'
   }
 ]
 </script>

@@ -162,7 +162,7 @@ export const weddingConfig: WeddingConfig = {
     guestEndpoint: '/api/guest',
   },
 
-  /** 图片墙（婚礼现场互动页 /live/wall） */
+  /** 图片墙（婚礼现场互动页 /live/wall，仅宾客活动照） */
   wall: {
     title: '爱的瞬间',
     en: 'Photo Wall',
@@ -170,6 +170,13 @@ export const weddingConfig: WeddingConfig = {
     maxSize: 1280,
     /** 与云函数 MAX_IMG_BYTES 对齐；base64 膨胀后仍需落在 SCF 非文本 6MB 内 */
     maxBytes: 3 * 1024 * 1024,
+  },
+
+  /** 婚纱照鉴赏（/live/portraits，仅新人婚纱照） */
+  portraitsAlbum: {
+    title: '婚纱照鉴赏',
+    en: 'Portraits',
+    sub: '精选婚纱照 · 慢慢翻看我们的故事',
   },
 
   /**

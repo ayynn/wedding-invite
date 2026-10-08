@@ -169,7 +169,24 @@ async function deleteRsvp(db, id) {
   return json({ ok: true, id })
 }
 
-async function listWall(db) {
+function normalizeAlbum(raw, fallback = 'wall') {
+  const v = String(raw || '')
+    .trim()
+    .toLowerCase()
+  if (v === 'portrait' || v === 'wall' || v === 'all') return v
+  return fallback
+}
+
+function resolveAlbum(meta) {
+  const explicit = normalizeAlbum(meta?.album, '')
+  if (explicit === 'portrait' || explicit === 'wall') return explicit
+  // 历史婚纱照（控制台同步）默认归入鉴赏区
+  if (meta?.syncedFromStorage || meta?.name === '新人精选') return 'portrait'
+  return 'wall'
+}
+
+async function listWall(db, albumFilter) {
+  const album = normalizeAlbum(albumFilter, 'all')
   let data = []
   try {
     ;({ data } = await db.collection('wall').orderBy('createdAt', 'desc').limit(500).get())
@@ -177,16 +194,23 @@ async function listWall(db) {
     ;({ data } = await db.collection('wall').limit(500).get())
   }
   const items = (data || [])
-    .map((meta) => ({
-      id: meta.id || meta._id,
-      name: meta.name,
-      caption: meta.caption,
-      url: `/wall/${meta.id || meta._id}`,
-      width: meta.width,
-      height: meta.height,
-      likes: Math.max(0, Number(meta.likes) || 0),
-      createdAt: meta.createdAt
-    }))
+    .filter((meta) => meta && !meta._init && (meta.fileID || meta.cloudPath || meta.id || meta._id))
+    .map((meta) => {
+      const id = meta.id || meta._id
+      const itemAlbum = resolveAlbum(meta)
+      return {
+        id,
+        name: meta.name || '',
+        caption: meta.caption || '',
+        url: `/wall/${id}`,
+        width: meta.width || 1440,
+        height: meta.height || 1920,
+        likes: Math.max(0, Number(meta.likes) || 0),
+        album: itemAlbum,
+        createdAt: meta.createdAt
+      }
+    })
+    .filter((item) => album === 'all' || item.album === album)
     .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
   return json(items)
 }
@@ -226,6 +250,7 @@ async function createWall(app, db, body) {
     return json({ ok: false, error: '图片上传失败' }, 500)
   }
 
+  const album = normalizeAlbum(body.album, 'wall')
   const meta = {
     id,
     name: body.name.trim().slice(0, 20),
@@ -233,13 +258,14 @@ async function createWall(app, db, body) {
     width: Math.max(1, Math.round(body.width ?? 1280)),
     height: Math.max(1, Math.round(body.height ?? 853)),
     likes: 0,
+    album: album === 'portrait' ? 'portrait' : 'wall',
     mime: parsed.mime,
     fileID: upload.fileID,
     cloudPath,
     createdAt
   }
   await db.collection('wall').doc(id).set(meta)
-  return json({ ok: true, id })
+  return json({ ok: true, id, album: meta.album })
 }
 
 async function likeWall(db, id) {
@@ -261,6 +287,11 @@ async function updateWall(app, db, id, body) {
   const nextName = body?.name != null ? String(body.name).trim().slice(0, 20) : prev.name
   if (!nextName) return json({ ok: false, error: '缺少昵称' }, 400)
 
+  const nextAlbum =
+    body?.album != null
+      ? normalizeAlbum(body.album, resolveAlbum(prev))
+      : resolveAlbum(prev)
+
   const meta = {
     ...withoutDocId(prev),
     id,
@@ -268,7 +299,8 @@ async function updateWall(app, db, id, body) {
     caption:
       body?.caption != null ? String(body.caption).trim().slice(0, 60) : prev.caption || '',
     width: body?.width != null ? Math.max(1, Math.round(body.width)) : prev.width,
-    height: body?.height != null ? Math.max(1, Math.round(body.height)) : prev.height
+    height: body?.height != null ? Math.max(1, Math.round(body.height)) : prev.height,
+    album: nextAlbum === 'portrait' ? 'portrait' : 'wall'
   }
 
   if (body?.image) {
@@ -462,7 +494,10 @@ exports.main = async (event) => {
     }
 
     if (path === '/api/wall' || path.endsWith('/api/wall')) {
-      if (method === 'GET') return await listWall(db)
+      if (method === 'GET') {
+        const query = getQuery(event)
+        return await listWall(db, query.album)
+      }
       if (method === 'POST') return await createWall(app, db, parseBody(event))
       return json({ ok: false, error: 'Method Not Allowed' }, 405)
     }

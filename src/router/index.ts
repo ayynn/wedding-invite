@@ -31,12 +31,7 @@ const router = createRouter({
         {
           path: 'portraits',
           name: 'live-portraits',
-          component: () => import('@/views/live/LiveComingSoon.vue'),
-          meta: {
-            title: '婚纱照鉴赏',
-            en: 'Portraits',
-            desc: '新郎新娘婚纱照鉴赏即将上线，敬请期待。'
-          }
+          component: () => import('@/views/live/LivePortraits.vue')
         },
         {
           path: 'lottery',
@@ -60,13 +55,7 @@ const router = createRouter({
         },
         {
           path: 'moments',
-          name: 'live-moments',
-          component: () => import('@/views/live/LiveComingSoon.vue'),
-          meta: {
-            title: '实时瞬间',
-            en: 'Live Moments',
-            desc: '节日现场实时图片上传与鉴赏即将开放，可先体验照片墙。'
-          }
+          redirect: { name: 'live-wall' }
         },
         {
           path: 'profile',

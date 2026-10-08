@@ -1,22 +1,40 @@
 <script setup lang="ts">
 defineOptions({ name: 'photo-wall-section' })
 
-import { reactive, ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { computed, reactive, ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import PhotoSwipe from 'photoswipe'
 import 'photoswipe/style.css'
-import type { WallItem } from '@/types'
+import type { WallAlbum, WallItem } from '@/types'
 import { fetchWall, likeWall, uploadWall } from '@/api/client'
+import { useGuestIdentity } from '@/composables/useGuestIdentity'
 import SectionTitle from './SectionTitle.vue'
 
-const props = defineProps<{
-  endpoint: string
-  maxSize: number
-  maxBytes: number
-  title: string
-  en: string
-  sub: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    endpoint: string
+    maxSize: number
+    maxBytes: number
+    title: string
+    en: string
+    sub: string
+    /** 相册分区 */
+    album?: WallAlbum
+    /** 是否展示上传表单（婚纱照鉴赏关闭） */
+    allowUpload?: boolean
+    /** 上传/点赞是否要求已登记身份 */
+    requireLogin?: boolean
+  }>(),
+  {
+    album: 'wall',
+    allowUpload: true,
+    requireLogin: true
+  }
+)
+
+const router = useRouter()
+const { isAnonymous, profile, displayName } = useGuestIdentity()
 
 const LIKED_KEY = 'wedding_wall_liked'
 
@@ -24,6 +42,7 @@ const LIKED_KEY = 'wedding_wall_liked'
 const items = ref<WallItem[]>([])
 const loading = ref(true)
 const loadError = ref('')
+const authTip = ref('')
 
 /* ---------- 上传表单 ---------- */
 const form = reactive({ name: '', caption: '' })
@@ -35,6 +54,34 @@ const uploadOk = ref(false)
 
 let lightbox: PhotoSwipeLightbox | null = null
 let liking = false
+
+const needLogin = computed(() => props.requireLogin && isAnonymous.value)
+const emptyText = computed(() =>
+  props.album === 'portrait'
+    ? '婚纱照正在准备中，稍后再来看吧 ♥'
+    : '墙上还没有照片，登录后来分享你们的笑脸吧 ♥'
+)
+
+watch(
+  () => profile.value.name,
+  (name) => {
+    if (name && !form.name) form.name = name
+  },
+  { immediate: true }
+)
+
+function goProfile(): void {
+  void router.push({ name: 'live-profile' })
+}
+
+function ensureLoggedIn(action: string): boolean {
+  if (!needLogin.value) {
+    authTip.value = ''
+    return true
+  }
+  authTip.value = `${action}前请先完善姓名与手机号`
+  return false
+}
 
 function readLikedIds(): Set<string> {
   try {
@@ -110,6 +157,11 @@ function initLightbox(): void {
       onClick: async (_e, el, pswpInstance) => {
         const item = getItemByIndex(pswpInstance.currIndex)
         if (!item || liking) return
+        if (!ensureLoggedIn('点赞')) {
+          pswpInstance.close()
+          goProfile()
+          return
+        }
         const liked = readLikedIds()
         if (liked.has(item.id)) return
         liking = true
@@ -134,15 +186,14 @@ function initLightbox(): void {
 async function loadWall(): Promise<void> {
   loading.value = true
   try {
-    items.value = await fetchWall(props.endpoint)
+    items.value = await fetchWall(props.endpoint, props.album)
     loadError.value = ''
   } catch (err) {
-    loadError.value = '图片墙暂时无法加载'
+    loadError.value = props.album === 'portrait' ? '婚纱照暂时无法加载' : '图片墙暂时无法加载'
     console.warn('[Wall] 加载失败:', err)
   } finally {
     loading.value = false
   }
-  // 确保 v-if 渲染出 #wall-gallery 后再初始化 PhotoSwipe
   await nextTick()
   initLightbox()
 }
@@ -185,6 +236,10 @@ function onPick(): void {
 }
 
 async function onSubmit(): Promise<void> {
+  if (!ensureLoggedIn('上传')) {
+    goProfile()
+    return
+  }
   const file = fileInput.value?.files?.[0]
   if (!file) {
     uploadError.value = '请选择一张照片'
@@ -195,7 +250,8 @@ async function onSubmit(): Promise<void> {
     uploadError.value = `图片超过 ${mb}MB，请换一张小一点的`
     return
   }
-  if (!form.name.trim()) {
+  const name = (form.name.trim() || profile.value.name || displayName.value).trim()
+  if (!name || name === '匿名宾客') {
     uploadError.value = '请填写您的昵称'
     return
   }
@@ -208,14 +264,14 @@ async function onSubmit(): Promise<void> {
       return
     }
     await uploadWall(props.endpoint, {
-      name: form.name.trim(),
+      name: name.slice(0, 20),
       caption: form.caption.trim(),
       image,
       width,
-      height
+      height,
+      album: props.album
     })
     uploadOk.value = true
-    form.name = ''
     form.caption = ''
     pickedName.value = ''
     if (fileInput.value) fileInput.value.value = ''
@@ -245,8 +301,12 @@ onUnmounted(() => {
     <div class="wrap">
       <SectionTitle :en="en" :cn="title" :sub="sub" />
 
-      <!-- 上传表单 -->
-      <form class="wall-form reveal" @submit.prevent="onSubmit">
+      <div v-if="needLogin && allowUpload" class="auth-gate reveal">
+        <p>上传与点赞前，请先完善姓名与手机号完成登录。</p>
+        <button type="button" class="auth-btn" @click="goProfile">去完善资料</button>
+      </div>
+
+      <form v-else-if="allowUpload" class="wall-form reveal" @submit.prevent="onSubmit">
         <div class="row">
           <input v-model="form.name" type="text" placeholder="您的昵称 *" maxlength="20" />
           <input v-model="form.caption" type="text" placeholder="写一句话（可选）" maxlength="60" />
@@ -264,8 +324,15 @@ onUnmounted(() => {
         <p v-if="uploadOk" class="form-ok-tip">感谢分享，照片已上墙 ♥</p>
       </form>
 
+      <p v-if="authTip" class="form-err auth-inline reveal">{{ authTip }}</p>
+
+      <div v-if="needLogin && !allowUpload" class="auth-gate soft reveal">
+        <p>点赞前请先完善姓名与手机号。</p>
+        <button type="button" class="auth-btn" @click="goProfile">去完善资料</button>
+      </div>
+
       <!-- 瀑布流 -->
-      <div v-if="loading" class="wall-loading reveal">正在加载爱的瞬间…</div>
+      <div v-if="loading" class="wall-loading reveal">正在加载…</div>
       <p v-else-if="loadError" class="wall-err reveal">{{ loadError }}</p>
       <div v-else-if="items.length" id="wall-gallery" class="wall-masonry reveal">
         <a
@@ -285,7 +352,7 @@ onUnmounted(() => {
           </div>
         </a>
       </div>
-      <p v-else class="wall-empty reveal">墙上还没有照片，来分享你们的笑脸吧 ♥</p>
+      <p v-else class="wall-empty reveal">{{ emptyText }}</p>
     </div>
   </section>
 </template>
@@ -293,6 +360,42 @@ onUnmounted(() => {
 <style scoped>
 .wall {
   background: var(--cream);
+}
+.auth-gate {
+  max-width: 560px;
+  margin: 36px auto 0;
+  padding: 22px 20px;
+  text-align: center;
+  border-radius: var(--radius);
+  border: 1px solid rgba(201, 168, 106, 0.34);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 8px 26px rgba(28, 46, 36, 0.06);
+}
+.auth-gate.soft {
+  margin-top: 28px;
+}
+.auth-gate p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--brown);
+  letter-spacing: 0.04em;
+}
+.auth-btn {
+  margin-top: 14px;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 22px;
+  background: linear-gradient(135deg, #8a7350, #6b6156);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+.auth-inline {
+  max-width: 560px;
+  margin: 12px auto 0;
+  text-align: center;
 }
 .wall-form {
   max-width: 560px;
@@ -379,128 +482,90 @@ onUnmounted(() => {
   transform: none;
 }
 .form-err {
-  margin-top: 12px;
-  color: #b0564a;
+  margin-top: 10px;
+  color: #8a3d34;
   font-size: 13px;
 }
 .form-ok-tip {
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--green);
   font-size: 13px;
-  letter-spacing: 0.06em;
 }
-
-/* 瀑布流 */
-.wall-masonry {
-  margin-top: 44px;
-  column-count: 3;
-  column-gap: 14px;
-}
-.wall-item {
-  display: block;
-  position: relative;
-  break-inside: avoid;
-  margin-bottom: 14px;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #e8e2d4;
-  box-shadow: 0 8px 22px rgba(28, 46, 36, 0.1);
-  opacity: 0;
-  animation: wallIn 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
-  transition: transform 0.5s, box-shadow 0.5s;
-}
-@keyframes wallIn {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.wall-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 34px rgba(28, 46, 36, 0.16);
-}
-.wall-item img {
-  width: 100%;
-  display: block;
-  transition: transform 0.8s;
-}
-.wall-item:hover img {
-  transform: scale(1.05);
-}
-.wall-likes {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: rgba(16, 26, 20, 0.5);
-  color: #fff;
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  backdrop-filter: blur(4px);
-}
-.wall-meta {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 26px 14px 12px;
-  background: linear-gradient(180deg, transparent, rgba(16, 26, 20, 0.72));
-  color: var(--ivory);
-  opacity: 0;
-  transform: translateY(8px);
-  transition: 0.4s;
-}
-.wall-item:hover .wall-meta {
-  opacity: 1;
-  transform: none;
-}
-.wall-meta b {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-}
-.wall-meta span {
-  display: block;
-  font-size: 12px;
-  opacity: 0.85;
-  margin-top: 2px;
-}
-.form-ok-tip,
 .wall-loading,
+.wall-err,
 .wall-empty {
-  font-family: var(--font-hand);
-  font-size: 16px;
-  letter-spacing: 0.08em;
-}
-.wall-loading,
-.wall-empty,
-.wall-err {
+  margin: 40px auto 0;
   text-align: center;
   color: var(--brown);
   font-size: 14px;
-  letter-spacing: 0.1em;
-  margin-top: 44px;
-  padding: 40px 0;
+  letter-spacing: 0.06em;
 }
-.wall-err {
-  color: #b0564a;
+.wall-masonry {
+  margin-top: 36px;
+  columns: 2;
+  column-gap: 12px;
+}
+@media (min-width: 720px) {
+  .wall-masonry {
+    columns: 3;
+  }
+}
+.wall-item {
+  position: relative;
+  display: block;
+  break-inside: avoid;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(28, 46, 36, 0.08);
+  animation: riseIn 0.55s var(--ease) both;
+}
+.wall-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+.wall-likes {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  font-size: 12px;
+}
+.wall-meta {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+.wall-meta b {
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.wall-meta span {
+  color: var(--brown);
+  font-size: 12px;
+}
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 640px) {
-  .wall-masonry {
-    column-count: 2;
-    column-gap: 10px;
-  }
-  .wall-item {
-    margin-bottom: 10px;
-  }
   .wall-form .row {
     flex-direction: column;
     gap: 0;

@@ -83,6 +83,28 @@ function seedDemo() {
         width: 8,
         height: 8,
         likes: [3, 1, 5, 0][i],
+        album: 'wall',
+        mime: 'image/jpeg',
+        createdAt
+      })
+    )
+    kv.set(`wallimg:${id}`, tiny)
+  }
+
+  // 模拟婚纱照鉴赏分区
+  for (let i = 0; i < 3; i++) {
+    const id = `seed-portrait-${i + 1}`
+    const createdAt = new Date(now - (i + 10) * 86400000).toISOString()
+    kv.set(
+      `wall:${id}`,
+      JSON.stringify({
+        id,
+        name: '新人精选',
+        caption: ['庭院光影', '并肩而立', '誓约时刻'][i],
+        width: 8,
+        height: 8,
+        likes: [2, 4, 1][i],
+        album: 'portrait',
         mime: 'image/jpeg',
         createdAt
       })
@@ -211,10 +233,12 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/api/wall' && req.method === 'GET') {
+    const album = (url.searchParams.get('album') || 'all').toLowerCase()
     const items = [...kv.entries()]
       .filter(([k]) => k.startsWith('wall:'))
       .map(([, v]) => {
         const m = JSON.parse(v)
+        const itemAlbum = m.album === 'portrait' ? 'portrait' : 'wall'
         return {
           id: m.id,
           name: m.name,
@@ -223,9 +247,11 @@ const server = http.createServer(async (req, res) => {
           width: m.width,
           height: m.height,
           likes: Math.max(0, Number(m.likes) || 0),
+          album: itemAlbum,
           createdAt: m.createdAt
         }
       })
+      .filter((m) => album === 'all' || m.album === album)
       .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
     return json(res, items)
   }
@@ -237,6 +263,7 @@ const server = http.createServer(async (req, res) => {
     const [header, b64] = body.image.split(',')
     const mime = header.replace('data:', '').replace(';base64', '') || 'image/jpeg'
     const id = `mock-${Date.now()}-${++seq}`
+    const album = body.album === 'portrait' ? 'portrait' : 'wall'
     const meta = {
       id,
       name: body.name.trim().slice(0, 20),
@@ -244,12 +271,13 @@ const server = http.createServer(async (req, res) => {
       width: body.width || 1280,
       height: body.height || 853,
       likes: 0,
+      album,
       mime,
       createdAt: new Date().toISOString()
     }
     kv.set(`wall:${id}`, JSON.stringify(meta))
     kv.set(`wallimg:${id}`, b64)
-    return json(res, { ok: true, id })
+    return json(res, { ok: true, id, album })
   }
 
   /* ---------- API: 宾客身份 ---------- */

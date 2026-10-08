@@ -181,7 +181,6 @@ const spaFallbackRoutes = [
   'live/portraits/index.html',
   'live/lottery/index.html',
   'live/games/index.html',
-  'live/moments/index.html',
   'live/profile/index.html',
   'admin/index.html',
   'admin/login/index.html',

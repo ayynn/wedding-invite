@@ -4,7 +4,7 @@ defineOptions({ name: 'admin-wall' })
 import { computed, onMounted, reactive, ref } from 'vue'
 import { weddingConfig } from '@/config/wedding'
 import { deleteWall, deleteWallBatch, fetchWall, updateWall, uploadWall } from '@/api/client'
-import type { WallItem } from '@/types'
+import type { WallAlbum, WallItem } from '@/types'
 
 const endpoint = weddingConfig.api.wallEndpoint
 const maxSize = weddingConfig.wall.maxSize
@@ -18,10 +18,12 @@ const batching = ref(false)
 const showForm = ref(false)
 const editingId = ref<string | null>(null)
 const selected = ref<Set<string>>(new Set())
+const albumFilter = ref<WallAlbum | 'all'>('all')
 
 const form = reactive({
   name: '',
   caption: '',
+  album: 'wall' as WallAlbum,
   image: '',
   width: 1280,
   height: 853
@@ -38,7 +40,7 @@ async function load(): Promise<void> {
   error.value = ''
   selected.value = new Set()
   try {
-    list.value = await fetchWall(endpoint)
+    list.value = await fetchWall(endpoint, albumFilter.value)
   } catch (e) {
     error.value = e instanceof Error ? e.message : '加载失败'
     list.value = []
@@ -50,6 +52,7 @@ async function load(): Promise<void> {
 function resetForm(): void {
   form.name = ''
   form.caption = ''
+  form.album = 'wall'
   form.image = ''
   form.width = 1280
   form.height = 853
@@ -66,10 +69,15 @@ function openEdit(item: WallItem): void {
   editingId.value = item.id
   form.name = item.name
   form.caption = item.caption
+  form.album = item.album === 'portrait' ? 'portrait' : 'wall'
   form.image = ''
   form.width = item.width
   form.height = item.height
   showForm.value = true
+}
+
+function albumLabel(album?: WallAlbum): string {
+  return album === 'portrait' ? '婚纱照' : '活动照'
 }
 
 function toggleOne(id: string, checked: boolean): void {
@@ -144,6 +152,7 @@ async function onSave(): Promise<void> {
       await updateWall(endpoint, editingId.value, {
         name: form.name.trim(),
         caption: form.caption.trim(),
+        album: form.album,
         ...(form.image
           ? { image: form.image, width: form.width, height: form.height }
           : {})
@@ -157,6 +166,7 @@ async function onSave(): Promise<void> {
       await uploadWall(endpoint, {
         name: form.name.trim(),
         caption: form.caption.trim(),
+        album: form.album,
         image: form.image,
         width: form.width,
         height: form.height
@@ -205,9 +215,17 @@ onMounted(load)
     <header class="head">
       <div>
         <h1>照片墙管理</h1>
-        <p>增删改查宾客上传的瞬间</p>
+        <p>管理活动照与婚纱照分区</p>
       </div>
       <div class="actions">
+        <label class="filter">
+          <span>分区</span>
+          <select v-model="albumFilter" @change="load">
+            <option value="all">全部</option>
+            <option value="wall">活动照</option>
+            <option value="portrait">婚纱照</option>
+          </select>
+        </label>
         <button type="button" class="ghost" :disabled="loading" @click="load">刷新</button>
         <button
           type="button"
@@ -233,6 +251,13 @@ onMounted(load)
         <label>
           <span>文案</span>
           <input v-model="form.caption" type="text" maxlength="60" />
+        </label>
+        <label>
+          <span>分区 *</span>
+          <select v-model="form.album">
+            <option value="wall">活动照（照片墙）</option>
+            <option value="portrait">婚纱照（鉴赏）</option>
+          </select>
         </label>
         <label class="full">
           <span>{{ editingId ? '更换图片（可选）' : '选择图片 *' }}</span>
@@ -264,6 +289,7 @@ onMounted(load)
               />
             </th>
             <th>预览</th>
+            <th>分区</th>
             <th>昵称</th>
             <th>文案</th>
             <th>点赞</th>
@@ -274,12 +300,12 @@ onMounted(load)
         <tbody>
           <template v-if="loading">
             <tr>
-              <td colspan="7" class="empty">加载中…</td>
+              <td colspan="8" class="empty">加载中…</td>
             </tr>
           </template>
           <template v-else-if="!list.length">
             <tr>
-              <td colspan="7" class="empty">暂无照片</td>
+              <td colspan="8" class="empty">暂无照片</td>
             </tr>
           </template>
           <template v-else>
@@ -296,6 +322,11 @@ onMounted(load)
                 <a :href="item.url" target="_blank" rel="noopener">
                   <img class="thumb" :src="item.url" :alt="item.name" />
                 </a>
+              </td>
+              <td>
+                <span class="tag" :class="item.album === 'portrait' ? 'portrait' : 'wall'">
+                  {{ albumLabel(item.album) }}
+                </span>
               </td>
               <td>{{ item.name }}</td>
               <td>{{ item.caption || '—' }}</td>
@@ -331,6 +362,37 @@ h1 {
   color: var(--brown);
   font-size: 14px;
   margin-top: 4px;
+}
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--brown);
+}
+.filter select,
+.form-grid select {
+  border: 1px solid rgba(154, 143, 130, 0.35);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: #fff;
+  color: var(--green-deep);
+  font-family: inherit;
+}
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.tag.wall {
+  background: rgba(74, 107, 82, 0.12);
+  color: #2d4a36;
+}
+.tag.portrait {
+  background: rgba(166, 124, 82, 0.16);
+  color: #8a7350;
 }
 .actions {
   display: flex;
