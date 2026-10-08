@@ -159,6 +159,7 @@ export const weddingConfig: WeddingConfig = {
   api: {
     rsvpEndpoint: '/api/rsvp',
     wallEndpoint: '/api/wall',
+    guestEndpoint: '/api/guest',
   },
 
   /** 图片墙（婚礼现场互动页 /live/wall） */

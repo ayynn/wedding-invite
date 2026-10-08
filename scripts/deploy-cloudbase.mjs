@@ -91,6 +91,7 @@ run('tcb', ['fn', 'deploy', 'wedding-api', '-e', envId, '--force', '--yes'])
 const paths = [
   { path: 'api/rsvp', name: '/api/rsvp' },
   { path: 'api/wall', name: '/api/wall' },
+  { path: 'api/guest', name: '/api/guest' },
   { path: 'wall', name: '/wall' }
 ]
 
@@ -113,6 +114,7 @@ runTcbArgs(
       routes: [
         { path: '/api/rsvp', enablePathTransmission: true },
         { path: '/api/wall', enablePathTransmission: true },
+        { path: '/api/guest', enablePathTransmission: true },
         { path: '/wall', enablePathTransmission: true }
       ]
     })
@@ -142,7 +144,7 @@ runTcbArgs(
   { confirm: true, optional: true }
 )
 
-for (const name of ['rsvp', 'wall']) {
+for (const name of ['rsvp', 'wall', 'guest']) {
   runTcbArgs(
     [
       'db',
@@ -180,6 +182,7 @@ const spaFallbackRoutes = [
   'live/lottery/index.html',
   'live/games/index.html',
   'live/moments/index.html',
+  'live/profile/index.html',
   'admin/index.html',
   'admin/login/index.html',
   'admin/wall/index.html',
@@ -223,9 +226,10 @@ HTTP 网关路由：
   /          → 静态网站托管
   /api/rsvp  → wedding-api（路径透传）
   /api/wall  → wedding-api（路径透传）
+  /api/guest → wedding-api（路径透传）
   /wall      → wedding-api（路径透传）
 
 仍建议在控制台确认：
   1. 静态托管错误文档设为 index.html（SPA 回退）
-  2. 数据库 rsvp / wall 安全规则（云函数走管理员权限即可）
+  2. 数据库 rsvp / wall / guest 安全规则（云函数走管理员权限即可）
 `)

@@ -1,6 +1,6 @@
 /**
- * CloudBase 云函数：RSVP + 图片墙（含后台增删改查）
- * 通过 HTTP 网关挂载 /api/rsvp、/api/wall、/wall/*
+ * CloudBase 云函数：RSVP + 图片墙 + 宾客身份
+ * 通过 HTTP 网关挂载 /api/rsvp、/api/wall、/api/guest、/wall/*
  */
 const cloud = require('@cloudbase/node-sdk')
 
@@ -323,6 +323,101 @@ async function getWallImage(app, db, id) {
   return binary(file.fileContent, meta.mime || 'image/jpeg')
 }
 
+function normalizePhone(raw) {
+  return String(raw || '')
+    .replace(/\s+/g, '')
+    .replace(/^\+86/, '')
+    .slice(0, 20)
+}
+
+function isValidPhone(phone) {
+  return /^1\d{10}$/.test(phone)
+}
+
+function normalizeGuestName(raw) {
+  return String(raw || '')
+    .trim()
+    .slice(0, 40)
+}
+
+function guestPublic(record) {
+  return {
+    ok: true,
+    uuid: record.uuid,
+    name: record.name,
+    phone: record.phone,
+    registered: true,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt
+  }
+}
+
+async function findGuestByPhone(db, phone) {
+  try {
+    const { data } = await db.collection('guest').where({ phone }).limit(5).get()
+    const items = data || []
+    return items[0] || null
+  } catch {
+    const { data } = await db.collection('guest').limit(500).get()
+    return (data || []).find((g) => g.phone === phone) || null
+  }
+}
+
+async function getGuestByUuid(db, uuid) {
+  if (!uuid) return null
+  const { data } = await db.collection('guest').doc(uuid).get()
+  const doc = Array.isArray(data) ? data[0] : data
+  return doc || null
+}
+
+async function bindGuest(db, body) {
+  const uuid = String(body?.uuid || '').trim().slice(0, 64)
+  const name = normalizeGuestName(body?.name)
+  const phone = normalizePhone(body?.phone)
+
+  if (!uuid) return json({ ok: false, error: '缺少身份标识' }, 400)
+  if (!name) return json({ ok: false, error: '请填写姓名' }, 400)
+  if (!isValidPhone(phone)) return json({ ok: false, error: '请填写有效的手机号' }, 400)
+
+  const byPhone = await findGuestByPhone(db, phone)
+  if (byPhone && byPhone.uuid && byPhone.uuid !== uuid) {
+    return json(
+      { ok: false, error: '该手机号已登记，请使用姓名与手机号登录召回' },
+      409
+    )
+  }
+
+  const prev = (await getGuestByUuid(db, uuid)) || byPhone
+  const now = new Date().toISOString()
+  const record = {
+    uuid,
+    name,
+    phone,
+    registered: true,
+    createdAt: prev?.createdAt || now,
+    updatedAt: now
+  }
+  await db.collection('guest').doc(uuid).set(record)
+  return json(guestPublic(record))
+}
+
+async function loginGuest(db, body) {
+  const name = normalizeGuestName(body?.name)
+  const phone = normalizePhone(body?.phone)
+
+  if (!name) return json({ ok: false, error: '请填写姓名' }, 400)
+  if (!isValidPhone(phone)) return json({ ok: false, error: '请填写有效的手机号' }, 400)
+
+  const found = await findGuestByPhone(db, phone)
+  if (!found || !found.uuid) {
+    return json({ ok: false, error: '未找到该登记信息，请先完善资料' }, 404)
+  }
+  if (normalizeGuestName(found.name) !== name) {
+    return json({ ok: false, error: '姓名与手机号不匹配' }, 403)
+  }
+  return json(guestPublic(found))
+}
+
 exports.main = async (event) => {
   const method = getMethod(event)
   if (method === 'OPTIONS') {
@@ -369,6 +464,16 @@ exports.main = async (event) => {
     if (path === '/api/wall' || path.endsWith('/api/wall')) {
       if (method === 'GET') return await listWall(db)
       if (method === 'POST') return await createWall(app, db, parseBody(event))
+      return json({ ok: false, error: 'Method Not Allowed' }, 405)
+    }
+
+    if (path === '/api/guest/bind' || path.endsWith('/api/guest/bind')) {
+      if (method === 'POST') return await bindGuest(db, parseBody(event))
+      return json({ ok: false, error: 'Method Not Allowed' }, 405)
+    }
+
+    if (path === '/api/guest/login' || path.endsWith('/api/guest/login')) {
+      if (method === 'POST') return await loginGuest(db, parseBody(event))
       return json({ ok: false, error: 'Method Not Allowed' }, 405)
     }
 

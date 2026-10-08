@@ -2,6 +2,15 @@ import type { RsvpPayload, WallItem, WallUploadPayload } from '@/types'
 
 export type RsvpRecord = RsvpPayload & { id?: string }
 
+export interface GuestProfileRecord {
+  uuid: string
+  name: string
+  phone: string
+  registered: boolean
+  createdAt?: string
+  updatedAt?: string
+}
+
 const isOk = (r: Response): boolean => r.ok
 
 /** 通用 JSON 请求 */
@@ -12,7 +21,14 @@ async function jsonRequest<T>(url: string, init?: RequestInit): Promise<T> {
   })
   if (!isOk(res)) {
     const text = await res.text().catch(() => '')
-    throw new Error(`请求失败(${res.status}): ${text.slice(0, 120)}`)
+    let message = text.slice(0, 160)
+    try {
+      const parsed = JSON.parse(text) as { error?: string }
+      if (parsed.error) message = parsed.error
+    } catch {
+      /* keep raw */
+    }
+    throw new Error(message || `请求失败(${res.status})`)
   }
   return (await res.json()) as T
 }
@@ -118,4 +134,48 @@ export function likeWall(
   id: string
 ): Promise<{ ok: boolean; likes: number }> {
   return jsonRequest(`${endpoint}/${encodeURIComponent(id)}/like`, { method: 'POST', body: '{}' })
+}
+
+/** 补充姓名+手机号，将当前 uuid 绑定入库 */
+export async function bindGuestProfile(
+  endpoint: string,
+  payload: { uuid: string; name: string; phone: string }
+): Promise<GuestProfileRecord> {
+  const res = await jsonRequest<{ ok: boolean; error?: string } & Partial<GuestProfileRecord>>(
+    `${endpoint}/bind`,
+    { method: 'POST', body: JSON.stringify(payload) }
+  )
+  if (!res.ok || !res.uuid) {
+    throw new Error(res.error || '绑定失败')
+  }
+  return {
+    uuid: res.uuid,
+    name: res.name || payload.name,
+    phone: res.phone || payload.phone,
+    registered: true,
+    createdAt: res.createdAt,
+    updatedAt: res.updatedAt
+  }
+}
+
+/** 用姓名+手机号召回已绑定的 uuid */
+export async function loginGuestProfile(
+  endpoint: string,
+  payload: { name: string; phone: string }
+): Promise<GuestProfileRecord> {
+  const res = await jsonRequest<{ ok: boolean; error?: string } & Partial<GuestProfileRecord>>(
+    `${endpoint}/login`,
+    { method: 'POST', body: JSON.stringify(payload) }
+  )
+  if (!res.ok || !res.uuid) {
+    throw new Error(res.error || '登录失败')
+  }
+  return {
+    uuid: res.uuid,
+    name: res.name || payload.name,
+    phone: res.phone || payload.phone,
+    registered: true,
+    createdAt: res.createdAt,
+    updatedAt: res.updatedAt
+  }
 }

@@ -111,12 +111,24 @@ export interface WallItem {
   createdAt: string;
 }
 
+/** 宾客身份（姓名+手机号绑定 uuid） */
+export interface GuestProfile {
+  uuid: string;
+  name: string;
+  phone: string;
+  registered: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 /** API 端点配置 */
 export interface ApiConfig {
   /** RSVP 提交/查询接口 */
   rsvpEndpoint: string;
   /** 图片墙接口 */
   wallEndpoint: string;
+  /** 宾客身份绑定 / 登录召回 */
+  guestEndpoint: string;
 }
 
 /** 婚礼整体配置 */

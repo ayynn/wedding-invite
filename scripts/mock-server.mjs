@@ -1,6 +1,6 @@
 /**
  * 本地开发模拟后端（内存存储）
- * 用途：本地验证 /api/rsvp、/api/wall、/wall/:id 交互（含增删改）
+ * 用途：本地验证 /api/rsvp、/api/wall、/api/guest、/wall/:id 交互（含增删改）
  * 运行：node scripts/mock-server.mjs [port]
  */
 import http from 'node:http'
@@ -250,6 +250,61 @@ const server = http.createServer(async (req, res) => {
     kv.set(`wall:${id}`, JSON.stringify(meta))
     kv.set(`wallimg:${id}`, b64)
     return json(res, { ok: true, id })
+  }
+
+  /* ---------- API: 宾客身份 ---------- */
+  const normalizePhone = (raw) =>
+    String(raw || '')
+      .replace(/\s+/g, '')
+      .replace(/^\+86/, '')
+      .slice(0, 20)
+  const normalizeGuestName = (raw) => String(raw || '').trim().slice(0, 40)
+  const isValidPhone = (phone) => /^1\d{10}$/.test(phone)
+  const listGuests = () =>
+    [...kv.entries()]
+      .filter(([k]) => k.startsWith('guest:'))
+      .map(([, v]) => JSON.parse(v))
+
+  if (pathname === '/api/guest/bind' && req.method === 'POST') {
+    const body = await readBody(req)
+    const uuid = String(body.uuid || '').trim().slice(0, 64)
+    const name = normalizeGuestName(body.name)
+    const phone = normalizePhone(body.phone)
+    if (!uuid) return json(res, { ok: false, error: '缺少身份标识' }, 400)
+    if (!name) return json(res, { ok: false, error: '请填写姓名' }, 400)
+    if (!isValidPhone(phone)) return json(res, { ok: false, error: '请填写有效的手机号' }, 400)
+
+    const byPhone = listGuests().find((g) => g.phone === phone)
+    if (byPhone && byPhone.uuid !== uuid) {
+      return json(res, { ok: false, error: '该手机号已登记，请使用姓名与手机号登录召回' }, 409)
+    }
+
+    const prev = kv.has(`guest:${uuid}`) ? JSON.parse(kv.get(`guest:${uuid}`)) : byPhone
+    const now = new Date().toISOString()
+    const record = {
+      uuid,
+      name,
+      phone,
+      registered: true,
+      createdAt: prev?.createdAt || now,
+      updatedAt: now
+    }
+    kv.set(`guest:${uuid}`, JSON.stringify(record))
+    return json(res, { ok: true, ...record })
+  }
+
+  if (pathname === '/api/guest/login' && req.method === 'POST') {
+    const body = await readBody(req)
+    const name = normalizeGuestName(body.name)
+    const phone = normalizePhone(body.phone)
+    if (!name) return json(res, { ok: false, error: '请填写姓名' }, 400)
+    if (!isValidPhone(phone)) return json(res, { ok: false, error: '请填写有效的手机号' }, 400)
+    const found = listGuests().find((g) => g.phone === phone)
+    if (!found) return json(res, { ok: false, error: '未找到该登记信息，请先完善资料' }, 404)
+    if (normalizeGuestName(found.name) !== name) {
+      return json(res, { ok: false, error: '姓名与手机号不匹配' }, 403)
+    }
+    return json(res, { ok: true, ...found })
   }
 
   /* ---------- 图片读取 ---------- */

@@ -1,18 +1,25 @@
 <script setup lang="ts">
 defineOptions({ name: 'live-layout' })
 
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { weddingConfig } from '@/config/wedding'
 import { useReveal } from '@/composables/useReveal'
+import { useGuestIdentity } from '@/composables/useGuestIdentity'
 
 const route = useRoute()
 const router = useRouter()
 const config = weddingConfig
+const { ensure, isAnonymous, avatarLetter, displayName } = useGuestIdentity()
 
 useReveal()
 
+onMounted(() => {
+  ensure()
+})
+
 const showBack = computed(() => route.name !== 'live-home')
+const onProfile = computed(() => route.name === 'live-profile')
 
 function goHome(): void {
   void router.push({ name: 'live-home' })
@@ -20,6 +27,10 @@ function goHome(): void {
 
 function goInvite(): void {
   void router.push({ name: 'invite' })
+}
+
+function goProfile(): void {
+  void router.push({ name: 'live-profile' })
 }
 </script>
 
@@ -36,11 +47,27 @@ function goInvite(): void {
       >
         ←
       </button>
+      <button
+        v-else
+        type="button"
+        class="live-invite-link"
+        @click="goInvite"
+      >
+        请柬
+      </button>
       <div class="live-brand" @click="goHome">
         <span class="live-brand-en gold-text">{{ config.couple.logoParts.join(' ') }}</span>
         <span class="live-brand-cn">婚礼现场</span>
       </div>
-      <button type="button" class="live-invite-link" @click="goInvite">请柬</button>
+      <button
+        type="button"
+        class="live-avatar"
+        :class="{ registered: !isAnonymous, active: onProfile }"
+        :aria-label="`个人信息，当前${displayName}`"
+        @click="goProfile"
+      >
+        <span>{{ avatarLetter }}</span>
+      </button>
     </header>
 
     <main class="live-main">
@@ -115,7 +142,7 @@ function goInvite(): void {
 }
 
 .live-invite-link {
-  justify-self: end;
+  justify-self: start;
   padding: 8px 4px;
   font-size: 13px;
   letter-spacing: 0.12em;
@@ -143,6 +170,33 @@ function goInvite(): void {
   font-size: 13px;
   letter-spacing: 0.28em;
   color: var(--brown);
+}
+
+.live-avatar {
+  justify-self: end;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(196, 174, 138, 0.45);
+  border-radius: 50%;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #b0a498, #7a6e62);
+  color: #fff;
+  font-family: var(--font-name);
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.live-avatar.registered {
+  background: linear-gradient(145deg, #c4ae8a, #8a7350);
+}
+
+.live-avatar.active,
+.live-avatar:hover {
+  transform: scale(1.04);
+  box-shadow: 0 6px 16px rgba(92, 83, 72, 0.16);
 }
 
 .live-main {

@@ -67,6 +67,11 @@ const router = createRouter({
             en: 'Live Moments',
             desc: '节日现场实时图片上传与鉴赏即将开放，可先体验照片墙。'
           }
+        },
+        {
+          path: 'profile',
+          name: 'live-profile',
+          component: () => import('@/views/live/LiveProfile.vue')
         }
       ]
     },
