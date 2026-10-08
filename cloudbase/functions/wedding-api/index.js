@@ -185,7 +185,50 @@ function resolveAlbum(meta) {
   return 'wall'
 }
 
-async function listWall(db, albumFilter) {
+/** 对 URL path 分段 encode，兼容中文文件名缩略图（否则 <img> 常裂图） */
+function encodeUrlPath(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return rawUrl
+  try {
+    const u = new URL(rawUrl)
+    u.pathname = u.pathname
+      .split('/')
+      .map((seg) => {
+        if (!seg) return seg
+        try {
+          return encodeURIComponent(decodeURIComponent(seg))
+        } catch {
+          return encodeURIComponent(seg)
+        }
+      })
+      .join('/')
+    return u.toString()
+  } catch {
+    return rawUrl
+  }
+}
+
+/** 批量换取云存储临时 HTTPS 直链，避免缩略图并发打爆云函数 */
+async function resolveTempUrls(app, fileIds) {
+  const map = Object.create(null)
+  const ids = [...new Set((fileIds || []).filter(Boolean))]
+  const CHUNK = 50
+  for (let i = 0; i < ids.length; i += CHUNK) {
+    const slice = ids.slice(i, i + CHUNK)
+    try {
+      const res = await app.getTempFileURL({ fileList: slice })
+      for (const item of res.fileList || []) {
+        if (item?.fileID && item?.tempFileURL && (item.code === 'SUCCESS' || !item.code)) {
+          map[item.fileID] = encodeUrlPath(item.tempFileURL)
+        }
+      }
+    } catch (err) {
+      console.warn('getTempFileURL failed', err?.message || err)
+    }
+  }
+  return map
+}
+
+async function listWall(app, db, albumFilter) {
   const album = normalizeAlbum(albumFilter, 'all')
   let data = []
   try {
@@ -193,16 +236,25 @@ async function listWall(db, albumFilter) {
   } catch {
     ;({ data } = await db.collection('wall').limit(500).get())
   }
-  const items = (data || [])
-    .filter((meta) => meta && !meta._init && (meta.fileID || meta.cloudPath || meta.id || meta._id))
+
+  const metas = (data || []).filter(
+    (meta) => meta && !meta._init && (meta.fileID || meta.cloudPath || meta.id || meta._id)
+  )
+  const tempUrls = await resolveTempUrls(
+    app,
+    metas.map((m) => m.fileID).filter(Boolean)
+  )
+
+  const items = metas
     .map((meta) => {
       const id = meta.id || meta._id
       const itemAlbum = resolveAlbum(meta)
+      const fallback = `/wall/${id}`
       return {
         id,
         name: meta.name || '',
         caption: meta.caption || '',
-        url: `/wall/${id}`,
+        url: (meta.fileID && tempUrls[meta.fileID]) || fallback,
         width: meta.width || 1440,
         height: meta.height || 1920,
         likes: Math.max(0, Number(meta.likes) || 0),
@@ -344,11 +396,42 @@ async function deleteWall(app, db, id) {
   return json({ ok: true, id })
 }
 
-async function getWallImage(app, db, id) {
+async function getWallImage(app, db, id, method = 'GET') {
   if (!id) return notFound()
   const { data } = await db.collection('wall').doc(id).get()
   const meta = Array.isArray(data) ? data[0] : data
   if (!meta?.fileID) return notFound()
+
+  // 优先 302 到临时直链，减轻云函数带宽与并发压力（缩略图友好）
+  try {
+    const temp = await app.getTempFileURL({ fileList: [meta.fileID] })
+    const url = temp.fileList?.[0]?.tempFileURL
+    if (url) {
+      return {
+        statusCode: 302,
+        headers: {
+          Location: url,
+          'Cache-Control': 'public, max-age=300',
+          ...CORS
+        },
+        body: ''
+      }
+    }
+  } catch {
+    /* fall through to download */
+  }
+
+  if (method === 'HEAD') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': meta.mime || 'image/jpeg',
+        'Cache-Control': 'public, max-age=86400',
+        ...CORS
+      },
+      body: ''
+    }
+  }
 
   const file = await app.downloadFile({ fileID: meta.fileID })
   if (!file.fileContent) return notFound()
@@ -496,7 +579,7 @@ exports.main = async (event) => {
     if (path === '/api/wall' || path.endsWith('/api/wall')) {
       if (method === 'GET') {
         const query = getQuery(event)
-        return await listWall(db, query.album)
+        return await listWall(app, db, query.album)
       }
       if (method === 'POST') return await createWall(app, db, parseBody(event))
       return json({ ok: false, error: 'Method Not Allowed' }, 405)
@@ -513,8 +596,8 @@ exports.main = async (event) => {
     }
 
     const wallMatch = path.match(/\/wall\/([^/]+)\/?$/)
-    if (wallMatch && method === 'GET') {
-      return await getWallImage(app, db, decodeURIComponent(wallMatch[1]))
+    if (wallMatch && (method === 'GET' || method === 'HEAD')) {
+      return await getWallImage(app, db, decodeURIComponent(wallMatch[1]), method)
     }
 
     return notFound()

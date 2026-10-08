@@ -334,17 +334,24 @@ onUnmounted(() => {
       <!-- 瀑布流 -->
       <div v-if="loading" class="wall-loading reveal">正在加载…</div>
       <p v-else-if="loadError" class="wall-err reveal">{{ loadError }}</p>
-      <div v-else-if="items.length" id="wall-gallery" class="wall-masonry reveal">
+      <div v-else-if="items.length" id="wall-gallery" class="wall-masonry">
         <a
           v-for="(it, i) in items"
           :key="it.id"
           class="wall-item"
           :href="it.url"
+          :data-pswp-src="it.url"
           :data-pswp-width="it.width"
           :data-pswp-height="it.height"
-          :style="{ animationDelay: `${Math.min(i, 8) * 0.05}s` }"
+          :style="{ animationDelay: `${Math.min(i, 12) * 0.03}s` }"
         >
-          <img :src="it.url" :alt="it.caption || it.name" loading="lazy" />
+          <img
+            :src="it.url"
+            :alt="it.caption || it.name"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+          />
           <span class="wall-likes" aria-label="点赞数">♥ {{ it.likes ?? 0 }}</span>
           <div class="wall-meta">
             <b>{{ it.name }}</b>
